@@ -3,7 +3,7 @@ import Stripe from "stripe";
 
 // Initialize Stripe with the secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-06-20", // Use latest stable version or match your Stripe dashboard
+  apiVersion: "2026-06-24.dahlia", // Use latest stable version or match your Stripe dashboard
 });
 
 const MEMBERSHIP_PRICES = {
