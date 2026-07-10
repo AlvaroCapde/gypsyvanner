@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle } from "lucide-react"; // Assuming lucide-react might be installed, if not we'll use an SVG
+
 
 export default function SuccessPage() {
   return (
