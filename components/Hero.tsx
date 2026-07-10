@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -44,7 +45,7 @@ export default function Hero() {
             <span className="block mt-2">Excelencia.</span>
           </h1>
 
-          <button className="group relative inline-flex items-center justify-center bg-red-700 text-white font-sans text-sm tracking-wider uppercase font-medium px-8 py-4 overflow-hidden transition-all duration-500 hover:bg-red-800">
+          <Link href="/registro" className="group relative inline-flex items-center justify-center bg-red-700 text-white font-sans text-sm tracking-wider uppercase font-medium px-8 py-4 overflow-hidden transition-all duration-500 hover:bg-red-800">
             <span className="relative z-10 flex items-center gap-3">
               Explorar el Registro
               <svg
@@ -56,7 +57,7 @@ export default function Hero() {
                 <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </span>
-          </button>
+          </Link>
         </div>
       </div>
     </section>
