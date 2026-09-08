@@ -4,18 +4,31 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { parsePhoneNumberFromString, AsYouType, CountryCode } from "libphonenumber-js";
+
+const COUNTRIES: { code: CountryCode; label: string; dialCode: string }[] = [
+  { code: "MX", label: "México", dialCode: "+52" },
+  { code: "US", label: "Estados Unidos", dialCode: "+1" },
+  { code: "CA", label: "Canadá", dialCode: "+1" },
+  { code: "ES", label: "España", dialCode: "+34" },
+  { code: "CO", label: "Colombia", dialCode: "+57" },
+  { code: "AR", label: "Argentina", dialCode: "+54" },
+  { code: "CL", label: "Chile", dialCode: "+56" },
+  { code: "GT", label: "Guatemala", dialCode: "+502" },
+];
 
 const formSchema = z.object({
-  applicationType: z.enum(["new", "renewal"], {
-    message: "Por favor seleccione un tipo de aplicación.",
-  }),
-  membershipType: z.enum(["general", "associate", "youth", "lifetime"], {
-    message: "Por favor seleccione un tipo de membresía.",
-  }),
+  applicationType: z.literal("new"),
+  membershipType: z.literal("associate"),
   name: z.string().min(2, "El nombre completo es requerido."),
   farmName: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido."),
-  telephone: z.string().min(8, "El teléfono de contacto es requerido."),
+  telephone: z.string().min(1, "El teléfono celular es requerido."),
+  street: z.string().min(3, "La calle y número son requeridos."),
+  colonia: z.string().min(2, "La colonia es requerida."),
+  postalCode: z.string().min(4, "El código postal es requerido."),
+  city: z.string().min(2, "La ciudad es requerida."),
+  state: z.string().min(2, "El estado es requerido."),
   acknowledgeRules: z.boolean().refine((val) => val === true, {
     message: "Debe reconocer y aceptar las reglas de la sociedad.",
   }),
@@ -25,22 +38,79 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function MembershipForm() {
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryCode>("MX");
+  const [phoneDisplay, setPhoneDisplay] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      applicationType: "new",
+      membershipType: "associate",
+      telephone: "",
+    },
   });
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawVal = e.target.value;
+    const asYouType = new AsYouType(selectedCountry);
+    const formatted = asYouType.input(rawVal);
+    setPhoneDisplay(formatted);
+    setPhoneError("");
+
+    // Validate phone number
+    const parsed = parsePhoneNumberFromString(rawVal, selectedCountry);
+    if (parsed && parsed.isValid()) {
+      setValue("telephone", parsed.format("E.164"), { shouldValidate: true });
+    } else {
+      setValue("telephone", rawVal, { shouldValidate: false });
+    }
+  };
+
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCountry = e.target.value as CountryCode;
+    setSelectedCountry(newCountry);
+    // Reformat existing input if present
+    if (phoneDisplay) {
+      const asYouType = new AsYouType(newCountry);
+      const formatted = asYouType.input(phoneDisplay);
+      setPhoneDisplay(formatted);
+      const parsed = parsePhoneNumberFromString(phoneDisplay, newCountry);
+      if (parsed && parsed.isValid()) {
+        setValue("telephone", parsed.format("E.164"), { shouldValidate: true });
+      }
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
       setErrorMessage("");
+      setPhoneError("");
+
+      // Final strict E.164 validation before submission
+      const parsed = parsePhoneNumberFromString(data.telephone, selectedCountry);
+      if (!parsed || !parsed.isValid()) {
+        const errorMsg = "Por favor ingresa un número de teléfono celular válido para recibir el código SMS de acceso.";
+        setPhoneError(errorMsg);
+        return;
+      }
+
+      const canonicalPhone = parsed.format("E.164");
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          telephone: canonicalPhone,
+          applicationType: "new",
+          membershipType: "associate",
+        }),
       });
 
       const result = await response.json();
@@ -66,54 +136,28 @@ export default function MembershipForm() {
         </div>
       )}
 
-      {/* 1. Tipo de Aplicación */}
+      {/* Membresía */}
       <div className="mb-12">
-        <h3 className="font-serif text-2xl text-zinc-950 border-b border-zinc-200 pb-4 mb-6">Tipo de Solicitud</h3>
-        <div className="flex flex-col sm:flex-row gap-6">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="radio" value="new" {...register("applicationType")} className="w-4 h-4 text-red-700 focus:ring-red-700 accent-red-700" />
-            <span className="font-sans text-zinc-800">Nuevo Miembro</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="radio" value="renewal" {...register("applicationType")} className="w-4 h-4 text-red-700 focus:ring-red-700 accent-red-700" />
-            <span className="font-sans text-zinc-800">Renovación</span>
-          </label>
-        </div>
-        {errors.applicationType && <p className="mt-2 text-sm text-red-600">{errors.applicationType.message}</p>}
-      </div>
-
-      {/* 2. Tipo de Membresía */}
-      <div className="mb-12">
-        <h3 className="font-serif text-2xl text-zinc-950 border-b border-zinc-200 pb-4 mb-6">Tipo de Membresía</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex items-start gap-3 p-4 ring-1 ring-zinc-200 cursor-pointer hover:bg-zinc-50 transition-colors">
-            <input type="radio" value="general" {...register("membershipType")} className="mt-1 w-4 h-4 accent-red-700" />
-            <div>
-              <div className="font-sans font-medium text-zinc-950">General ($80 Anual)</div>
-              <div className="text-sm text-zinc-500 mt-1">Con derecho a voto, para propietarios de Gypsy Vanner.</div>
+        <h3 className="font-serif text-2xl text-zinc-950 border-b border-zinc-200 pb-4 mb-6">Membresía</h3>
+        <div className="p-5 border border-zinc-200 bg-zinc-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full bg-red-700 flex items-center justify-center text-white flex-shrink-0">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-          </label>
-          <label className="flex items-start gap-3 p-4 ring-1 ring-zinc-200 cursor-pointer hover:bg-zinc-50 transition-colors">
-            <input type="radio" value="associate" {...register("membershipType")} className="mt-1 w-4 h-4 accent-red-700" />
-            <div>
-              <div className="font-sans font-medium text-zinc-950">Asociado ($50 Anual)</div>
-              <div className="text-sm text-zinc-500 mt-1">Sin derecho a voto, para amigos de la GVHS.</div>
+            <div className="font-sans font-medium text-zinc-950 text-base">
+              Membresía de Asociado
             </div>
-          </label>
-          <label className="flex items-start gap-3 p-4 ring-1 ring-zinc-200 cursor-pointer hover:bg-zinc-50 transition-colors">
-            <input type="radio" value="youth" {...register("membershipType")} className="mt-1 w-4 h-4 accent-red-700" />
-            <div>
-              <div className="font-sans font-medium text-zinc-950">Joven ($25 Anual)</div>
-              <div className="text-sm text-zinc-500 mt-1">Membresía anual para jóvenes.</div>
-            </div>
-          </label>
-          <label className="flex items-start gap-3 p-4 ring-1 ring-zinc-200 cursor-pointer hover:bg-zinc-50 transition-colors">
-            <input type="radio" value="lifetime" {...register("membershipType")} className="mt-1 w-4 h-4 accent-red-700" />
-            <div>
-              <div className="font-sans font-medium text-zinc-950">Vitalicia ($1200)</div>
-              <div className="text-sm text-zinc-500 mt-1">Membresía de por vida.</div>
-            </div>
-          </label>
+          </div>
+          <div className="font-sans font-semibold text-zinc-950 text-base">
+            $900 MXN <span className="text-xs text-zinc-500 font-normal">/ Anual</span>
+          </div>
+          <input 
+            type="hidden" 
+            value="associate" 
+            {...register("membershipType")} 
+          />
         </div>
         {errors.membershipType && <p className="mt-2 text-sm text-red-600">{errors.membershipType.message}</p>}
       </div>
@@ -140,14 +184,99 @@ export default function MembershipForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Teléfono *</label>
-            <input type="tel" {...register("telephone")} className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans text-zinc-950" />
-            {errors.telephone && <p className="mt-1 text-sm text-red-600">{errors.telephone.message}</p>}
+            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Teléfono Celular *</label>
+            <div className="flex border border-zinc-300 bg-zinc-50 focus-within:ring-1 focus-within:ring-zinc-950">
+              <select
+                value={selectedCountry}
+                onChange={handleCountryChange}
+                className="bg-zinc-100 text-zinc-800 text-sm font-sans px-3 py-3 border-r border-zinc-300 focus:outline-none cursor-pointer"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.dialCode} ({c.code})
+                  </option>
+                ))}
+              </select>
+              <input 
+                type="tel" 
+                value={phoneDisplay}
+                onChange={handlePhoneChange}
+                placeholder={selectedCountry === "MX" ? "55 1234 5678" : "Número celular"}
+                className="w-full bg-transparent px-4 py-3 focus:outline-none font-sans text-zinc-950" 
+              />
+            </div>
+            <p className="mt-1 text-xs text-zinc-500 font-sans">
+              Recibirás un código de acceso por SMS a este número al completar tu pago.
+            </p>
+            {(phoneError || errors.telephone) && (
+              <p className="mt-1 text-sm text-red-600">{phoneError || errors.telephone?.message}</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* 4. Acuerdos Legales */}
+      {/* Domicilio */}
+      <div className="mb-12">
+        <h3 className="font-serif text-2xl text-zinc-950 border-b border-zinc-200 pb-4 mb-6">Domicilio</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Calle y Número *</label>
+            <input 
+              type="text" 
+              placeholder="Calle, número exterior e interior"
+              {...register("street")} 
+              className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans text-zinc-950" 
+            />
+            {errors.street && <p className="mt-1 text-sm text-red-600">{errors.street.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Colonia *</label>
+            <input 
+              type="text" 
+              placeholder="Colonia o fraccionamiento"
+              {...register("colonia")} 
+              className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans text-zinc-950" 
+            />
+            {errors.colonia && <p className="mt-1 text-sm text-red-600">{errors.colonia.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Código Postal *</label>
+            <input 
+              type="text" 
+              placeholder="C.P."
+              {...register("postalCode")} 
+              className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans text-zinc-950" 
+            />
+            {errors.postalCode && <p className="mt-1 text-sm text-red-600">{errors.postalCode.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Ciudad *</label>
+            <input 
+              type="text" 
+              placeholder="Ciudad o municipio"
+              {...register("city")} 
+              className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans text-zinc-950" 
+            />
+            {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-sans font-medium text-zinc-700 mb-2">Estado *</label>
+            <input 
+              type="text" 
+              placeholder="Estado"
+              {...register("state")} 
+              className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans text-zinc-950" 
+            />
+            {errors.state && <p className="mt-1 text-sm text-red-600">{errors.state.message}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Acuerdos Legales */}
       <div className="mb-12 bg-zinc-50 p-6 ring-1 ring-zinc-200">
         <label className="flex items-start gap-4 cursor-pointer">
           <input type="checkbox" {...register("acknowledgeRules")} className="mt-1 w-5 h-5 accent-red-700 flex-shrink-0" />
@@ -163,14 +292,18 @@ export default function MembershipForm() {
         <button 
           type="submit" 
           disabled={isSubmitting}
-          className="group relative inline-flex items-center justify-center bg-red-700 text-white font-sans text-sm tracking-wider uppercase font-medium px-10 py-4 overflow-hidden transition-all duration-500 hover:bg-red-800 disabled:bg-zinc-400 disabled:cursor-not-allowed"
+          className="group relative inline-flex items-center justify-center bg-red-700 text-white font-sans text-xs sm:text-sm tracking-wider uppercase font-medium px-8 sm:px-10 py-4 overflow-hidden transition-all duration-500 hover:bg-red-800 disabled:bg-zinc-400 disabled:cursor-not-allowed shadow-md cursor-pointer"
         >
           <span className="relative z-10 flex items-center gap-3">
-            {isSubmitting ? "Procesando..." : "Enviar Solicitud"}
-            {!isSubmitting && (
-              <svg className="w-4 h-4 transform transition-transform duration-500 group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+            {isSubmitting ? (
+              "Conectando con la pasarela de pago seguro..."
+            ) : (
+              <>
+                <span>Pagar Membresía</span>
+                <svg className="w-4 h-4 transform transition-transform duration-500 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </>
             )}
           </span>
         </button>

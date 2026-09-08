@@ -49,7 +49,7 @@ export default function Membership() {
               </span>
             </Link>
             <div className="mt-2 text-sm text-zinc-500 font-sans">
-              ¿Ya tienes membresía? <Link href="#login" className="text-red-700 hover:text-red-800 font-medium underline underline-offset-4">Ver mi registro</Link>
+              ¿Ya tienes membresía? <Link href="/login" className="text-red-700 hover:text-red-800 font-medium underline underline-offset-4">Acceder a mi cuenta</Link>
             </div>
           </div>
         </div>

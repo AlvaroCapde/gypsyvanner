@@ -18,15 +18,46 @@ export default function Footer() {
           <div className="flex flex-col space-y-4">
             <h4 className="text-zinc-100 font-sans text-xs font-bold uppercase tracking-wider">Contacto Directo</h4>
             <ul className="space-y-3 text-sm text-zinc-400 font-sans">
-              <li>Roberto Mena: <a href="tel:+523312947594" className="hover:text-white transition-colors">+52 33 1294 7594</a></li>
-              <li>Nicolás Campero: <a href="tel:+523316045548" className="hover:text-white transition-colors">+52 33 1604 5548</a></li>
-              <li>Mónica Valle: <a href="tel:+523311471212" className="hover:text-white transition-colors">+52 33 1147 1212</a></li>
+              <li>
+                Roberto Mena:{" "}
+                <a 
+                  href="https://wa.me/523312947594" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-white transition-colors"
+                >
+                  +52 33 1294 7594
+                </a>
+              </li>
+              <li>
+                Nicolás Campero:{" "}
+                <a 
+                  href="https://wa.me/523316045548" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-white transition-colors"
+                >
+                  +52 33 1604 5548
+                </a>
+              </li>
+              <li>
+                Mónica Valle:{" "}
+                <a 
+                  href="https://wa.me/523311471212" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-white transition-colors"
+                >
+                  +52 33 1147 1212
+                </a>
+              </li>
             </ul>
           </div>
 
           <div className="flex flex-col space-y-4">
             <h4 className="text-zinc-100 font-sans text-xs font-bold uppercase tracking-wider">Legal & Enlaces</h4>
             <ul className="space-y-3 text-sm text-zinc-400 font-sans">
+              <li><a href="#faq" className="hover:text-white transition-colors">Preguntas Frecuentes (FAQ)</a></li>
               <li><a href="#terminos" className="hover:text-white transition-colors">Términos y Condiciones</a></li>
               <li><a href="#privacidad" className="hover:text-white transition-colors">Aviso de Privacidad</a></li>
               <li><a href="#registro" className="hover:text-white transition-colors">Registro de Membresía</a></li>

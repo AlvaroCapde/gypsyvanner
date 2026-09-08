@@ -1,24 +1,11 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
+import { provisionMember, supabaseAdmin } from "@/lib/memberships";
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2026-06-24.dahlia",
 });
-
-// Initialize Supabase Admin Client
-// It's critical to use the SERVICE_ROLE_KEY here to bypass RLS and create users
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -43,16 +30,92 @@ export async function POST(req: Request) {
   // Handle checkout session completed
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    
-    // Retrieve metadata we passed during checkout creation
+    const metadata = session.metadata || {};
+
+    // Caso 1: Registro de Caballo
+    if (metadata.type === "horse_registration" || metadata.registrationId) {
+      const registrationId = metadata.registrationId;
+      if (!registrationId) {
+        console.error("No se encontró registrationId en la metadata de la sesión");
+        return new NextResponse("Invalid horse registration metadata", { status: 400 });
+      }
+
+      try {
+        const updatePayload: Record<string, any> = {
+          payment_status: "paid",
+          status: "under_review",
+          stripe_session_id: session.id,
+          paid_at: new Date().toISOString(),
+        };
+
+        if (session.payment_intent) {
+          updatePayload.stripe_payment_intent_id =
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent.id;
+        }
+
+        if (metadata.subtotalMxn) {
+          updatePayload.subtotal_fee_mxn = Number(metadata.subtotalMxn);
+        }
+        if (metadata.platformFeeMxn) {
+          updatePayload.platform_fee_mxn = Number(metadata.platformFeeMxn);
+        }
+        if (metadata.totalFeeMxn) {
+          updatePayload.total_fee_mxn = Number(metadata.totalFeeMxn);
+        } else if (session.amount_total) {
+          updatePayload.total_fee_mxn = session.amount_total / 100;
+        }
+
+        let { error: updateError } = await supabaseAdmin
+          .from("horse_registrations")
+          .update(updatePayload)
+          .eq("id", registrationId);
+
+        // Si falla por columnas de platform fee no creadas en el esquema, reintentar sin ellas
+        if (
+          updateError &&
+          (updateError.message?.includes("column") || (updateError as any).code === "PGRST204")
+        ) {
+          console.warn("Reintentando actualización de pago de caballo sin columnas de platform fee:", updateError.message);
+          const { subtotal_fee_mxn: _sub, platform_fee_mxn: _pf, ...safePayload } = updatePayload;
+          const retryResult = await supabaseAdmin
+            .from("horse_registrations")
+            .update(safePayload)
+            .eq("id", registrationId);
+          updateError = retryResult.error;
+        }
+
+        if (updateError) {
+          console.error("Error al actualizar registro de caballo desde webhook:", updateError);
+          return new NextResponse("Error updating horse registration", { status: 500 });
+        }
+
+        console.log(`Registro de caballo ${registrationId} actualizado a pagado / en revisión.`);
+        return new NextResponse("Success", { status: 200 });
+      } catch (err: any) {
+        console.error("Error procesando webhook de caballo:", err);
+        return new NextResponse("Error processing horse registration webhook", { status: 500 });
+      }
+    }
+
+    // Caso 2: Membresía anual
     const { 
       email, 
       name, 
       telephone, 
       farmName, 
       applicationType, 
-      membershipType 
-    } = session.metadata || {};
+      membershipType,
+      street,
+      colonia,
+      postalCode,
+      city,
+      state,
+      subtotalMxn,
+      platformFeeMxn,
+      totalPaidMxn,
+    } = metadata;
 
     if (!email) {
       console.error("No email found in session metadata");
@@ -60,65 +123,32 @@ export async function POST(req: Request) {
     }
 
     try {
-      // 1. Check if user exists or create new user in Supabase Auth
-      let userId: string;
-      
-      // Try to find the user first using the admin API
-      const { data: { users }, error: userError } = await supabaseAdmin.auth.admin.listUsers();
-      
-      // Since listUsers might return many, a better approach is to create it, 
-      // and if it fails because it exists, we find it, OR we just use admin.createUser
-      // Supabase has admin.createUser which returns an error if email exists.
-      
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email: email,
-        email_confirm: true, // Auto confirm so they can just request OTP
-        user_metadata: {
-          full_name: name,
-        },
-      });
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
 
-      if (createError) {
-        if (createError.message.includes('already been registered')) {
-          // User exists, find their ID
-          // In a real production app with many users, you should query by email directly
-          // We will use a workaround for now by listing users or assuming we handle it.
-          // The most robust way to find user by email with admin is:
-          // Wait, supabaseAdmin.auth.admin doesn't have getUserByEmail, it has listUsers().
-          // If we want to be safe, we can try to find them, but let's assume we can just do a query to auth.users if we really need to, 
-          // but we can't easily query auth.users from client API without RPC.
-          // For now, let's use listUsers and filter (OK for small DB).
-          const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
-          const existingUser = listData.users.find(u => u.email === email);
-          if (!existingUser) {
-             throw new Error("User registration failed and could not find existing user");
-          }
-          userId = existingUser.id;
-        } else {
-          throw createError;
-        }
-      } else {
-        userId = newUser.user.id;
-      }
-
-      // 2. Upsert the membership record
-      const { error: insertError } = await supabaseAdmin.from("memberships").upsert({
-        id: userId,
+      await provisionMember({
+        phone: telephone,
         email,
         name,
-        farm_name: farmName || null,
-        telephone,
-        application_type: applicationType,
-        membership_type: membershipType,
-        status: "active",
+        farmName,
+        applicationType,
+        membershipType,
+        street,
+        colonia,
+        postalCode,
+        city,
+        state,
+        subtotalMxn: subtotalMxn ? Number(subtotalMxn) : 900,
+        platformFeeMxn: platformFeeMxn ? Number(platformFeeMxn) : 67,
+        totalPaidMxn: session.amount_total ? session.amount_total / 100 : (totalPaidMxn ? Number(totalPaidMxn) : 967),
+        stripeSessionId: session.id,
+        stripePaymentIntentId: paymentIntentId,
+        paidAt: new Date().toISOString(),
       });
 
-      if (insertError) {
-        console.error("Error inserting membership:", insertError);
-        throw insertError;
-      }
-
-      console.log(`Successfully processed membership for ${email}`);
+      console.log(`Successfully processed membership for phone: ${telephone} (${email})`);
     } catch (err: any) {
       console.error("Error processing webhook data:", err);
       return new NextResponse("Error processing webhook data", { status: 500 });

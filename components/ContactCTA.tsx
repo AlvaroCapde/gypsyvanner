@@ -34,15 +34,36 @@ export default function ContactCTA() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="flex flex-col items-center">
               <span className="font-serif text-lg font-medium text-zinc-900">Roberto Mena</span>
-              <a href="tel:+523312947594" className="font-sans text-zinc-500 hover:text-red-700 transition-colors mt-1">+52 33 1294 7594</a>
+              <a 
+                href="https://wa.me/523312947594" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-sans text-zinc-500 hover:text-red-700 transition-colors mt-1"
+              >
+                +52 33 1294 7594
+              </a>
             </div>
             <div className="flex flex-col items-center">
               <span className="font-serif text-lg font-medium text-zinc-900">Nicolás Campero</span>
-              <a href="tel:+523316045548" className="font-sans text-zinc-500 hover:text-red-700 transition-colors mt-1">+52 33 1604 5548</a>
+              <a 
+                href="https://wa.me/523316045548" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-sans text-zinc-500 hover:text-red-700 transition-colors mt-1"
+              >
+                +52 33 1604 5548
+              </a>
             </div>
             <div className="flex flex-col items-center">
               <span className="font-serif text-lg font-medium text-zinc-900">Mónica Valle</span>
-              <a href="tel:+523311471212" className="font-sans text-zinc-500 hover:text-red-700 transition-colors mt-1">+52 33 1147 1212</a>
+              <a 
+                href="https://wa.me/523311471212" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-sans text-zinc-500 hover:text-red-700 transition-colors mt-1"
+              >
+                +52 33 1147 1212
+              </a>
             </div>
           </div>
         </div>

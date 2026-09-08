@@ -73,7 +73,7 @@ export default function RegistroPage() {
                         </div>
                       </div>
                       <p className="text-zinc-700 leading-relaxed">
-                        <strong>Pruebas de ADN obligatorias:</strong> Las pruebas de ADN son requeridas para todas las yeguas y sementales. No es obligatorio para los caballos castrados (geldings), pero ten en cuenta que si decides no confirmar por ADN la ascendencia de tu caballo castrado, este pasará al <em>Pre Studbook</em>.
+                        <strong>Pruebas de ADN obligatorias:</strong> Las pruebas de ADN son requeridas para todas las yeguas, sementales y potros.
                       </p>
                     </li>
                     <li className="flex gap-4">
@@ -132,6 +132,16 @@ export default function RegistroPage() {
           <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-24">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-serif text-zinc-900 mb-4">El valor de la Autenticidad</h2>
+
+              <div className="my-6">
+                <blockquote className="text-2xl sm:text-3xl font-serif text-zinc-950 font-medium">
+                  Sin registro no es Gypsy Vanner.
+                </blockquote>
+                <p className="text-zinc-500 font-sans text-base sm:text-lg mt-1 font-medium">
+                  Sé parte de la marca registrada Gypsy Vanner.
+                </p>
+              </div>
+
               <p className="text-zinc-500 font-sans max-w-2xl mx-auto">Conoce por qué registrar a tu caballo con la GVHS no solo asegura su linaje, sino que protege e incrementa dramáticamente su valor.</p>
             </div>
 

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function Hero() {
   return (
@@ -23,23 +24,23 @@ export default function Hero() {
           <div className="text-white font-serif text-xl tracking-wide font-medium">
             GVHS México
           </div>
-          <a
-            href="#login"
+          <Link
+            href="/login"
             className="text-zinc-200 text-sm font-sans tracking-wide hover:text-white transition-colors"
           >
             Iniciar Sesión
-          </a>
+          </Link>
         </div>
       </header>
 
       {/* Hero Content */}
       <div className="relative z-10 flex-1 flex flex-col justify-end pb-24 md:pb-0 md:justify-center px-6 sm:px-12 md:px-24 w-full max-w-7xl mx-auto">
         <div className="max-w-2xl mt-auto md:mt-0 ml-auto md:text-right flex flex-col md:items-end">
-          <p className="font-sans text-xs sm:text-sm tracking-[0.3em] font-semibold mb-6">
-            <span className="text-emerald-500">Gypsy</span>{" "}
-            <span className="text-white">Vanner Horse</span>{" "}
-            <span className="text-red-600">Society</span>
-          </p>
+          <div className="mb-6 relative inline-block">
+            {/* Soft ambient backlight so background photo never clashes */}
+            <div className="absolute -inset-6 bg-gradient-to-r from-amber-500/10 via-white/15 to-transparent blur-2xl rounded-full pointer-events-none" />
+            <Logo variant="dark" size="lg" className="relative z-10 drop-shadow-xl" />
+          </div>
           <h1 className="text-white font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] mb-12">
             El Estándar de<br />
             <span className="block mt-2">Excelencia.</span>

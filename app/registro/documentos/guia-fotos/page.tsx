@@ -19,13 +19,11 @@ export default function HowToTakePhotosPage() {
 
       <h3 className="text-center mt-12 mb-6">EJEMPLO de fotos laterales</h3>
       <div className="flex flex-col md:flex-row gap-6 justify-center items-center my-8">
-        <div className="relative w-full max-w-md aspect-video bg-zinc-100 rounded-lg overflow-hidden border border-zinc-200 shadow-sm flex items-center justify-center">
-          <img src="/horse_material/ejemplo_lado_izq.png" alt="Ejemplo lado izquierdo" className="object-cover w-full h-full m-0" />
-          <span className="hidden absolute text-zinc-400 text-sm">ejemplo_lado_izq.png</span>
+        <div className="relative w-full max-w-md aspect-[4/3] bg-zinc-950 rounded-lg overflow-hidden border border-zinc-300 shadow-sm flex items-center justify-center p-2">
+          <img src="/horse_material/ejemplo_lado_izq.png" alt="Ejemplo lado izquierdo" className="object-contain w-full h-full m-0 select-none" />
         </div>
-        <div className="relative w-full max-w-md aspect-video bg-zinc-100 rounded-lg overflow-hidden border border-zinc-200 shadow-sm flex items-center justify-center">
-          <img src="/horse_material/ejemplo_lado_der.png" alt="Ejemplo lado derecho" className="object-cover w-full h-full m-0" />
-          <span className="hidden absolute text-zinc-400 text-sm">ejemplo_lado_der.png</span>
+        <div className="relative w-full max-w-md aspect-[4/3] bg-zinc-950 rounded-lg overflow-hidden border border-zinc-300 shadow-sm flex items-center justify-center p-2">
+          <img src="/horse_material/ejemplo_lado_der.png" alt="Ejemplo lado derecho" className="object-contain w-full h-full m-0 select-none" />
         </div>
       </div>
 
@@ -42,13 +40,11 @@ export default function HowToTakePhotosPage() {
 
       <h3 className="text-center mt-12 mb-6">EJEMPLO de fotos frontales y traseras</h3>
       <div className="flex flex-col md:flex-row gap-6 justify-center items-center my-8">
-        <div className="relative w-full max-w-[280px] aspect-[3/4] bg-zinc-100 rounded-lg overflow-hidden border border-zinc-200 shadow-sm flex items-center justify-center">
-          <img src="/horse_material/ejemplo_frente.png" alt="Ejemplo de frente" className="object-cover w-full h-full m-0" />
-          <span className="hidden absolute text-zinc-400 text-sm">ejemplo_frente.png</span>
+        <div className="relative w-full max-w-[280px] aspect-[3/4] bg-zinc-950 rounded-lg overflow-hidden border border-zinc-300 shadow-sm flex items-center justify-center p-2">
+          <img src="/horse_material/ejemplo_frente.png" alt="Ejemplo de frente" className="object-contain w-full h-full m-0 select-none" />
         </div>
-        <div className="relative w-full max-w-[280px] aspect-[3/4] bg-zinc-100 rounded-lg overflow-hidden border border-zinc-200 shadow-sm flex items-center justify-center">
-          <img src="/horse_material/ejemplo_trasera.png" alt="Ejemplo de parte trasera" className="object-cover w-full h-full m-0" />
-          <span className="hidden absolute text-zinc-400 text-sm">ejemplo_trasera.png</span>
+        <div className="relative w-full max-w-[280px] aspect-[3/4] bg-zinc-950 rounded-lg overflow-hidden border border-zinc-300 shadow-sm flex items-center justify-center p-2">
+          <img src="/horse_material/ejemplo_trasera.png" alt="Ejemplo de parte trasera" className="object-contain w-full h-full m-0 select-none" />
         </div>
       </div>
     </DocumentViewer>

@@ -14,17 +14,17 @@ export default function Logo({ className = "", variant = "dark", size = "md" }: 
     xl: "w-48 h-36 sm:w-64 sm:h-48"
   }[size];
 
-  return (
+  const logoSrc = variant === "dark" ? "/gvhs-logo-dark.png" : "/gvhs-logo.png";
 
-    <div className={`relative ${sizeClasses}`}>
+  return (
+    <div className={`relative ${sizeClasses} ${className}`}>
       <Image
-        src="/gvhs-logo.png"
+        src={logoSrc}
         alt="GVHS México Logo"
         fill
-        className="object-contain scale-[1.3]"
+        className="object-contain"
         priority
       />
     </div>
-
   );
 }

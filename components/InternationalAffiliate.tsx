@@ -31,7 +31,7 @@ export default function InternationalAffiliate() {
               </p>
 
               <p className="font-sans text-lg md:text-xl text-zinc-700 leading-relaxed">
-                La <strong>Gypsy Vanner Horse Society</strong> es el registro fundador dedicado a preservar, promover y proteger al auténtico caballo Gypsy Vanner. A través de un linaje verificado, estrictos estándares de raza y respeto cultural, apoyamos a criadores, propietarios y entusiastas que valoran la autenticidad y belleza de este caballo históricamente significativo.
+                La <strong>Gypsy Vanner Horse Society</strong> es el registro fundador dedicado a preservar, promover y proteger al auténtico caballo Gypsy Vanner. A través de un linaje verificado, estrictos estándares de raza y respeto cultural, apoyamos a criadores, propietarios y entusiastas que valoran la autenticidad y belleza de este caballo históricamente significativo realizando evaluaciones con jueces certificados para indicar la calidad de los caballos y otorgar premios.
               </p>
 
               <div className="border-l-4 border-red-700 pl-6 py-2">
