@@ -45,7 +45,11 @@ export default async function RegistroCaballoPage() {
       <header className="w-full bg-zinc-950 h-20 flex items-center px-6 sm:px-12 md:px-24 border-b border-white/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center">
+            <Link
+              href="/"
+              className="flex items-center hover:opacity-90 transition-opacity"
+              aria-label="Ir a la página principal"
+            >
               <Logo variant="dark" size="md" className="scale-75 origin-left" />
             </Link>
             <span className="hidden sm:inline-block text-xs uppercase tracking-widest text-zinc-400 border-l border-zinc-800 pl-6">
