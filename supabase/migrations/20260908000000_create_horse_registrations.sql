@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS public.horse_registrations (
   birth_date DATE NOT NULL,
   country_of_birth TEXT NOT NULL,
   
+  -- Medidas de estatura y alzada
+  current_height TEXT,
+  current_height_date DATE,
+  expected_height TEXT,
+  
   -- Información de pasaporte (condicional)
   has_passport BOOLEAN NOT NULL DEFAULT false,
   import_date DATE,

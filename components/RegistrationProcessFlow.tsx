@@ -31,11 +31,11 @@ const STEPS: Step[] = [
     tag: "Paso 1",
     title: "Pagar la membresía",
     description:
-      "Adquiere tu membresía oficial anual, requisito indispensable para tener acceso al padrón y registrar caballos.",
+      "Adquiere tu membresía oficial anual, requisito indispensable para tener acceso al padrón y pre-registrar caballos.",
     highlights: [
       "Membresía anual activa",
       "Acceso al padrón oficial de criadores",
-      "Habilita el inicio de registro de ejemplares",
+      "Habilita el inicio de pre-registro de ejemplares",
     ],
     image: "/horse_material/1.jpg",
     ctaText: "Solicitar membresía",
@@ -44,16 +44,16 @@ const STEPS: Step[] = [
   {
     number: "02",
     tag: "Paso 2",
-    title: "Pruebas de ADN y registro",
+    title: "Pruebas de ADN y pre-registro",
     description:
-      "Con tu membresía, comienza a registrar tus caballos, pagando sus pruebas de ADN y enviando la solicitud.",
+      "Con tu membresía, comienza a pre-registrar tus caballos, pagando sus pruebas de ADN y enviando la solicitud.",
     highlights: [
       "Pruebas genéticas de salud PSSM1 y FIS",
       "Cotejo de 4 fotografías reglamentarias",
-      "Envío de muestras de bulbo capilar",
+      "Envío de muestras de folículo capilar",
     ],
     image: "/horse_material/6.jpg",
-    ctaText: "Ver reglas de registro",
+    ctaText: "Ver reglas de pre-registro",
     ctaHref: "/registro",
   },
   {
@@ -68,7 +68,7 @@ const STEPS: Step[] = [
       "Requisito reglamentario para inspección",
     ],
     image: "/horse_material/4.jpg",
-    ctaText: "Ver proceso de registro",
+    ctaText: "Ver proceso de pre-registro",
     ctaHref: "/registro",
   },
   {
@@ -79,14 +79,14 @@ const STEPS: Step[] = [
     description:
       "Una vez que te lleguen los documentos, guárdalos y mantente atento para cuando inicie la inscripción registrarte en la inspección oficial.",
     prerequisiteNote:
-      "Es necesario concluir todos los pasos anteriores (membresía, pruebas de ADN, registro de caballos) para que documentos y caballos estén listos para la inspección oficial del 9 de marzo de 2026, realizada por jueces oficiales de GVHS. En esta inspección se determinará si el caballo califica como Gypsy Vanner y puede entrar a los libros de registro.",
+      "Es necesario concluir todos los pasos anteriores (membresía, pruebas de ADN, pre-registro de caballos) para que documentos y caballos estén listos para la inspección oficial del 9 de marzo de 2026, realizada por jueces oficiales de GVHS. En esta inspección se determinará si el caballo califica como Gypsy Vanner y puede entrar a los libros de registro.",
     costs: [
       { label: "Menores de 3 años", amount: "$2,500 MXN" },
       { label: "Mayores de 3 años", amount: "$4,000 MXN" },
     ],
     costFootnote: "+ costo adicional de emitir el certificado",
     image: "/horse_material/5.jpg",
-    ctaText: "Preparar registro",
+    ctaText: "Preparar pre-registro",
     ctaHref: "/registro",
   },
 ];
@@ -111,10 +111,10 @@ export default function RegistrationProcessFlow() {
         <div className="max-w-4xl mx-auto mb-12 md:mb-16 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
           <div className="text-center md:text-left flex-1">
             <p className="font-sans text-xs uppercase tracking-[0.25em] text-red-700 font-semibold mb-3">
-              Flujo de Registro
+              Flujo de Pre-Registro
             </p>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-zinc-950 leading-tight">
-              Sé parte de los caballos <span className="text-red-700">fundadores</span>, comienza el registro.
+              Sé parte de los caballos <span className="text-red-700">fundadores</span>, comienza el pre-registro.
             </h2>
           </div>
 
@@ -351,7 +351,7 @@ export default function RegistrationProcessFlow() {
                 Preparación para la Inspección Presencial de Jueces GVHS
               </h4>
               <p className="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed font-light">
-                Para que tus caballos y documentos estén listos para la evaluación presencial del <strong>9 de marzo de 2026</strong>, es indispensable concluir los 3 pasos previos: membresía anual activa, panel genético de ADN y registro de caballos. En la inspección se determinará si el ejemplar califica como Gypsy Vanner y puede ingresar a los libros oficiales.
+                Para que tus caballos y documentos estén listos para la evaluación presencial del <strong>9 de marzo de 2026</strong>, es indispensable concluir los 3 pasos previos: membresía anual activa, panel genético de ADN y pre-registro de caballos. En la inspección se determinará si el ejemplar califica como Gypsy Vanner y puede ingresar a los libros oficiales.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-shrink-0">
@@ -365,7 +365,7 @@ export default function RegistrationProcessFlow() {
                 href="/registro"
                 className="inline-flex items-center justify-center px-6 py-3 border border-zinc-300 text-zinc-800 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 transition-colors text-center"
               >
-                Guía de Registro
+                Guía de Pre-Registro
               </Link>
             </div>
           </div>

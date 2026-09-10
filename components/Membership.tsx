@@ -2,11 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 const BENEFITS = [
-  "Descuentos en cuotas de registro",
-  "Acceso exclusivo al registro en línea",
+  "Acceso exclusivo al pre-registro en línea",
   "Elegibilidad para programas de la GVHS",
   "Recepción de la revista anual Vanner",
-  "Anuncios gratuitos en los clasificados del portal",
   "Inclusión en el directorio oficial de miembros"
 ];
 
@@ -33,7 +31,7 @@ export default function Membership() {
 
           <div className="flex flex-col items-start gap-6">
             <p className="text-zinc-600 font-sans text-base max-w-sm">
-              Obtén la membresía oficial y empieza registra tu Gypsy Vanner hoy mismo.
+              Obtén la membresía oficial y comienza el pre-registro de tu Gypsy Vanner hoy mismo.
             </p>
             <Link href="/membresia" className="group relative inline-flex items-center justify-center bg-zinc-950 text-white font-sans text-sm tracking-wider uppercase font-medium px-8 py-4 overflow-hidden transition-all duration-500 hover:bg-zinc-800">
               <span className="relative z-10 flex items-center gap-3">

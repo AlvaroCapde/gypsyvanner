@@ -2,7 +2,7 @@ import DocumentViewer from "@/components/DocumentViewer";
 
 export default function RegistrationRulesPage() {
   return (
-    <DocumentViewer title="Registration Rules" filename="registration_rules.pdf">
+    <DocumentViewer title="Reglas de Registro" filename="reglas_registro.pdf">
       <p>
         La <strong>Gypsy Vanner Horse Society [GVHS]</strong> mantiene los libros genealógicos (studbooks) de los caballos de pura raza Gypsy Vanner. Un caballo no puede ser llamado Caballo Gypsy Vanner hasta que haya cumplido con todos los criterios para registrarse en los libros de la GVHS, según se modifiquen de vez en cuando. Habrá tres libros separados mantenidos por la GVHS: El Libro Regular de Gypsy Vanner, El Pre-Libro de Gypsy Vanner y un Libro Temporal. Todos los caballos registrados antes del 1 de abril de 2009 están en el Libro Regular de Gypsy Vanner.
       </p>
@@ -19,11 +19,11 @@ export default function RegistrationRulesPage() {
       <h3>II. REGISTRO PARA CABALLOS SIN ASCENDENCIA VERIFICABLE</h3>
       <p><strong>A.</strong> A partir del 1 de enero de 2017, cualquier yegua o semental con uno o ambos padres no verificados por ADN <strong>no será elegible</strong> para registro hasta que ocurra uno de los siguientes eventos:</p>
       <ol>
-        <li>La calificación de parentesco por ADN se confirma tanto en el padre como en la madre, momento en el que el registro se procesará en base a las reglas vigentes. O</li>
+        <li>La calificación de parentesco por ADN se confirma tanto en el padre como en la madre, momento en el que el registro se procesará en base a las reglas vigentes.</li>
         <li>El caballo es presentado en una evaluación de GVHS y obtiene una puntuación de 7 (x2) o superior en tipo de raza, Y un 70 o más de puntuación general en conformación/movimiento. La tarifa de registro y evaluación debe pagarse antes de la evaluación.
           <ul>
             <li>Estas puntuaciones calificarán al caballo para ser registrado en el Libro Regular de Gypsy Vanner después de recibir los artículos de la Sección I 1-5.</li>
-            <li>Si un caballo no logra las puntuaciones requeridas, puede ser presentado nuevamente en una fecha posterior para una reevaluación. O</li>
+            <li>Si un caballo no logra las puntuaciones requeridas, puede ser presentado nuevamente en una fecha posterior para una reevaluación.</li>
           </ul>
         </li>
         <li>Registro de DIFICULTAD (HARDSHIP) de un Semental o Yegua con ascendencia desconocida y/o no verificable. (1/1/2020)
@@ -38,24 +38,10 @@ export default function RegistrationRulesPage() {
       </ol>
       <p><strong>B.</strong> Si el padre y la madre de un caballo sometido a registro no pueden ser calificados por ADN, se puede incluir la palabra "Foundation" (Fundación) en ese registro como padre y/o madre. Si en una fecha posterior el padre o la madre pueden ser verificados por ADN, entonces los registros de GVHS se actualizarán. El certificado de registro puede ser actualizado. (rev 1/1/2013)</p>
 
+      <h3>III. SEMENTALES CRIPTÓRQUIDOS Y CONDICIONES FÍSICAS EXCLUYENTES</h3>
+      <p>El uso de sementales criptórquidos [unilaterales y bilaterales] para la reproducción está prohibido. No se admiten caballos con problemas testiculares ni defectos de mandíbula (prognata y agnata), y no se aceptará descendencia de un semental criptórquido para su registro.</p>
 
-      <h3>III. INSEMINACIÓN ARTIFICIAL (IA) Y SEMEN TRANSPORTADO</h3>
-      <p><strong>A. Tipos.</strong> La Inseminación Artificial dentro o fuera de las instalaciones (Semen Transportado) incluye el uso de semen fresco extendido, fresco refrigerado y/o congelado.</p>
-      <p><strong>B. Semen Transportado.</strong> La cría mediante el uso de semen transportado se refiere a cualquier cría por inseminación artificial que tenga lugar en un lugar distinto a las instalaciones donde se encuentra el semental.</p>
-      <p><strong>C. Inseminación Artificial.</strong> Se aplican las mismas reglas y documentación a la inseminación artificial con semen fresco extendido y fresco refrigerado, que las aplicables a la monta natural. Ver Sección XI Registros de Cría.</p>
-      <p><strong>D. Semen Congelado de Semental Vivo.</strong> Se permite el uso de semen congelado de un semental vivo. El propietario, arrendatario o agente del propietario será responsable de la presentación y las tarifas de los Reportes de Cría del Semental y de proporcionar un certificado de monta a los dueños de las yeguas.</p>
-      <p><strong>E. Uso de Semen Congelado de Semental Fallecido Permitido.</strong> Se permitirá indefinidamente tras la muerte del semental. El semental debe estar registrado en el Libro de Gypsy Vanner, con ADN oficial registrado antes de su muerte. El dueño debe proporcionar la fecha de muerte junto con el Certificado de Registro original a la Sociedad. El Certificado original será devuelto marcado como "Deceased" (Fallecido).</p>
-      <ol type="a">
-        <li><strong>Solo se pueden usar Yeguas Registradas en GVHS.</strong> Solo las yeguas registradas al momento de la cría serán elegibles para criar con semen congelado de un semental fallecido.</li>
-        <li><strong>Propietario del Semental al Morir es Responsable de Reportes.</strong> El dueño registrado al momento de la muerte es responsable de presentar el Reporte de Cría del Semental y de las tarifas por cualquier cría en la que se utilice semen congelado.</li>
-        <li><strong>Firma del Certificado de Criador con Semen Congelado de Semental Fallecido.</strong> Se requerirá la firma del dueño registrado al momento de la muerte. Esta persona es la única autorizada a firmar los Reportes de Cría.</li>
-        <li><strong>Información Genética en Archivo; Calificación de Crías.</strong> El perfil genético de ADN debe estar archivado para el semental fallecido y cualquier yegua criada con su semen. El caballo solicitante debe calificar como descendiente de ambos.</li>
-      </ol>
-
-      <h3>IV. SEMENTALES CRIPTÓRQUIDOS</h3>
-      <p>El uso de sementales criptórquidos [unilaterales y bilaterales] para la reproducción está prohibido. No se aceptará descendencia de un semental criptórquido para su registro.</p>
-
-      <h3>V. NOMBRES REGISTRADOS</h3>
+      <h3>IV. NOMBRES REGISTRADOS</h3>
       <ol type="A">
         <li>El nombre completo de un caballo no debe exceder de cuarenta (40) espacios, incluyendo prefijo, letras, puntuación y espacios en blanco.</li>
         <li>No se puede utilizar un nombre que haya sido registrado previamente.</li>
@@ -63,11 +49,11 @@ export default function RegistrationRulesPage() {
         <li>El Registrador puede negarse a aceptar un nombre que considere confusamente similar a un nombre o prefijo registrado previamente, o que sea inapropiado.</li>
         <li>Se puede utilizar un nombre previamente usado seguido de "Second," "Third," o "Junior," etc.</li>
         <li>No se pueden usar símbolos numéricos en el nombre de un caballo, excepto como parte de un nombre de granja.</li>
-        <li>El nombre de un caballo no puede cambiarse una vez que ha sido registrado, excepto según lo permitido en la sección X.</li>
+        <li>El nombre de un caballo no puede cambiarse una vez que ha sido registrado, excepto según lo permitido en la sección IX.</li>
         <li>Si la solicitud es de un caballo importado, el nombre enviado puede ser diferente al nombre en el pasaporte u otros documentos. Si existe un pasaporte, se debe incluir una copia.</li>
       </ol>
 
-      <h3>VI. PREFIJOS REGISTRADOS</h3>
+      <h3>V. PREFIJOS REGISTRADOS</h3>
       <p>Un prefijo registrado es un nombre, palabra, letras, o combinación de estos, que precede a un nombre, registrado con el Registrador y utilizado exclusivamente por los propietarios de Caballos Gypsy Vanner para distinguir los caballos criados por ellos. La GVHS reconocerá el uso exclusivo de un prefijo para propósitos de registro bajo las siguientes condiciones:</p>
       <ol>
         <li>La palabra seleccionada no puede ser el nombre completo de un caballo ya registrado.</li>
@@ -92,7 +78,7 @@ export default function RegistrationRulesPage() {
         <li>Un criador puede abandonar un prefijo y comprar uno nuevo, un máximo de 2 veces.</li>
       </ol>
 
-      <h3>VII. CERTIFICADO DE REGISTRO</h3>
+      <h3>VI. CERTIFICADO DE REGISTRO</h3>
       <ol type="A">
         <li>El Certificado de Registro original se emitirá a nombre de la persona que era el dueño o arrendatario de la madre en el momento del parto.</li>
         <li>Los potros pre-vendidos <em>in utero</em> aún se considerarán propiedad y criados por el dueño de la madre, y se debe hacer una transferencia de propiedad.</li>
@@ -101,13 +87,13 @@ export default function RegistrationRulesPage() {
         <li>Un criador tiene la opción de emitir un certificado con "NOT FOR BREEDING" (NO PARA CRÍA) por problemas genéticos. La información se revisará caso por caso (6/2023).</li>
       </ol>
 
-      <h3>VIII. TRANSFERENCIA DEL REGISTRO DE PROPIEDAD</h3>
+      <h3>VII. TRANSFERENCIA DEL REGISTRO DE PROPIEDAD</h3>
       <ol type="A">
         <li>Para transferir la propiedad, se debe devolver el certificado original, llenar correctamente un formulario de transferencia, firmarlo y pagar la tarifa.</li>
         <li>En caso de defunción del dueño, ejecución hipotecaria u orden de un tribunal, el Registrador puede transferir el caballo presentando prueba satisfactoria de autoridad y el pago de la tarifa.</li>
       </ol>
 
-      <h3>IX. CERTIFICADOS DE REGISTRO DUPLICADOS</h3>
+      <h3>VIII. CERTIFICADOS DE REGISTRO DUPLICADOS</h3>
       <p>Se puede emitir un duplicado si:</p>
       <ol>
         <li>Se proporciona prueba satisfactoria de pérdida o destrucción del original.</li>
@@ -116,19 +102,19 @@ export default function RegistrationRulesPage() {
         <li>Al emitir un Duplicado, todos los certificados anteriores quedan anulados.</li>
       </ol>
 
-      <h3>X. CAMBIO DE NOMBRE</h3>
+      <h3>IX. CAMBIO DE NOMBRE</h3>
       <p>El nombre de un caballo puede ser cambiado una vez en su vida por el propietario registrado si:</p>
       <ol>
         <li>El caballo no se ha exhibido en un espectáculo oficial sancionado por GVHS.</li>
         <li>El caballo no tiene descendencia registrada.</li>
         <li>No se elimina un prefijo registrado.</li>
         <li>Se devuelve el Certificado original con la solicitud, tarifa y una carta de la persona que registró originalmente el caballo (2/2023), acordando el cambio.</li>
-        <li>El nuevo nombre cumple con la sección V.</li>
-        <li>Añadir solo un prefijo (VI. 18.) no contará como el cambio "de una sola vez" (Dec 2020).</li>
+        <li>El nuevo nombre cumple con la sección IV.</li>
+        <li>Añadir solo un prefijo (V. 18.) no contará como el cambio "de una sola vez" (Dec 2020).</li>
         <li>Si un criador tiene un prefijo registrado en el momento del cambio de nombre, debe agregarse.</li>
       </ol>
 
-      <h3>XI. REGISTROS DE CRÍA</h3>
+      <h3>X. REGISTROS DE CRÍA</h3>
       <p>Todos los dueños de sementales deben presentar un reporte anual de cría de sementales al Registrador.</p>
       <p>El dueño del semental debe proporcionar al dueño de cada yegua criada un certificado de monta de la GVHS.</p>
       <ol type="A">

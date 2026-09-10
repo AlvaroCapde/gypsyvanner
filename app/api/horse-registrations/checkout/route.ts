@@ -54,6 +54,9 @@ export async function POST(request: Request) {
       birth_date: validated.birthDate,
       countryOfBirth: validated.countryOfBirth,
       country_of_birth: validated.countryOfBirth,
+      current_height: validated.currentHeight || null,
+      current_height_date: validated.currentHeightDate || null,
+      expected_height: validated.expectedHeight || null,
       has_passport: validated.hasPassport,
       import_date: validated.importDate || null,
       passport_number: validated.passportNumber || null,
@@ -83,7 +86,7 @@ export async function POST(request: Request) {
       status: "pending_payment",
     };
 
-    // Payload de compatibilidad (sin columnas de platform fee ni color tests por si no se han migrado en la BD)
+    // Payload de compatibilidad (sin columnas de platform fee ni color tests ni estatura por si no se han migrado en la BD)
     const {
       subtotal_fee_mxn: _sub,
       platform_fee_mxn: _pf,
@@ -91,6 +94,9 @@ export async function POST(request: Request) {
       selected_color_tests: _sct,
       color_tests_fee_usd: _ctfu,
       color_tests_fee_mxn: _ctfm,
+      current_height: _ch,
+      current_height_date: _chd,
+      expected_height: _eh,
       ...legacyPayload
     } = fullPayload;
 
@@ -197,8 +203,8 @@ export async function POST(request: Request) {
           price_data: {
             currency: "mxn",
             product_data: {
-              name: `Registro de Ejemplar: ${validated.horseName.trim()}`,
-              description: `Tarifa de registro según categoría (${feeBreakdown.categoryLabel}).`,
+              name: `Pre-Registro de Ejemplar: ${validated.horseName.trim()}`,
+              description: `Tarifa de pre-registro según categoría (${feeBreakdown.categoryLabel}).`,
             },
             unit_amount: Math.round(feeBreakdown.baseFeeMxn * 100),
           },

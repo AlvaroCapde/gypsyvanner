@@ -34,10 +34,6 @@ export default function HowToTakePhotosPage() {
         No es necesario que el caballo esté arreglado para espectáculo, pero debe estar razonablemente limpio para poder mostrar sus plumas y marcas. En un caballo adulto con una cola larga y gruesa, la cola debe apartarse del camino en la foto trasera para que se puedan ver las marcas de las patas. La cola también puede estar trenzada o amarrada en su lugar.
       </p>
 
-      <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 my-8 text-blue-900">
-        Se prefiere que las fotos sean enviadas por correo electrónico a <strong>registrar@vanners.org</strong>. Deben ser fotos en formato <strong>.jpg</strong> cuando se envían por correo.
-      </div>
-
       <h3 className="text-center mt-12 mb-6">EJEMPLO de fotos frontales y traseras</h3>
       <div className="flex flex-col md:flex-row gap-6 justify-center items-center my-8">
         <div className="relative w-full max-w-[280px] aspect-[3/4] bg-zinc-950 rounded-lg overflow-hidden border border-zinc-300 shadow-sm flex items-center justify-center p-2">

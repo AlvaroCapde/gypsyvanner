@@ -60,7 +60,7 @@ export default function Footer() {
               <li><a href="#faq" className="hover:text-white transition-colors">Preguntas Frecuentes (FAQ)</a></li>
               <li><a href="#terminos" className="hover:text-white transition-colors">Términos y Condiciones</a></li>
               <li><a href="#privacidad" className="hover:text-white transition-colors">Aviso de Privacidad</a></li>
-              <li><a href="#registro" className="hover:text-white transition-colors">Registro de Membresía</a></li>
+              <li><a href="#registro" className="hover:text-white transition-colors">Pre-Registro y Membresía</a></li>
             </ul>
           </div>
 

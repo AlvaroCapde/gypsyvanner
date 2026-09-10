@@ -49,6 +49,9 @@ export default function HorseRegistrationWizard({
     gender: "stallion",
     birthDate: "",
     countryOfBirth: "México",
+    currentHeight: "",
+    currentHeightDate: "",
+    expectedHeight: "",
     hasPassport: false,
     importDate: "",
     passportNumber: "",
@@ -259,6 +262,15 @@ export default function HorseRegistrationWizard({
       if (!formData.countryOfBirth?.trim()) {
         newErrors.countryOfBirth = "El país de nacimiento es requerido.";
       }
+      if (!formData.currentHeight?.trim()) {
+        newErrors.currentHeight = "La estatura actual del caballo es requerida.";
+      }
+      if (!formData.currentHeightDate) {
+        newErrors.currentHeightDate = "La fecha de estatura actual es requerida.";
+      }
+      if (!formData.expectedHeight?.trim()) {
+        newErrors.expectedHeight = "La estatura esperada del caballo es requerida.";
+      }
     }
 
     if (step === 2 && formData.hasPassport) {
@@ -346,7 +358,7 @@ export default function HorseRegistrationWizard({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "No se pudo generar la orden de pago para el registro.");
+        throw new Error(result.error || "No se pudo generar la orden de pago para el pre-registro.");
       }
 
       if (!result.url) {
@@ -400,7 +412,7 @@ export default function HorseRegistrationWizard({
           </span>
         )}
         <p className="text-zinc-600 text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-8">
-          Hemos generado el expediente de registro para tu ejemplar con la categoría{" "}
+          Hemos generado el expediente de pre-registro para tu ejemplar con la categoría{" "}
           <strong>{feeBreakdown.categoryLabel}</strong>. Nuestro equipo verificará las fotografías y datos ingresados.
         </p>
 
@@ -536,7 +548,7 @@ export default function HorseRegistrationWizard({
       {isLoadingDraft && (
         <div className="mb-6 p-3.5 bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-md text-xs flex items-center gap-2.5">
           <div className="w-3.5 h-3.5 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-          <span>Restaurando los datos guardados de tu solicitud de registro...</span>
+          <span>Restaurando los datos guardados de tu solicitud de pre-registro...</span>
         </div>
       )}
 
@@ -547,7 +559,7 @@ export default function HorseRegistrationWizard({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="font-semibold text-blue-950">Continuando solicitud de registro: {formData.horseName || "Ejemplar"}</p>
+              <p className="font-semibold text-blue-950">Continuando solicitud de pre-registro: {formData.horseName || "Ejemplar"}</p>
               <p className="text-blue-800">Tus datos y fotografías reglamentarias han sido recuperados. Puedes revisar los detalles y proceder al pago.</p>
             </div>
           </div>
@@ -781,6 +793,76 @@ export default function HorseRegistrationWizard({
                     <p className="text-xs text-red-600 mt-1.5">{errors.countryOfBirth}</p>
                   )}
                 </div>
+
+                {/* Estatura y Medidas del Ejemplar */}
+                <div className="md:col-span-2 pt-4 border-t border-zinc-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold">
+                      Estatura y Medidas del Ejemplar
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Estatura Actual */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                        Estatura Actual *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.currentHeight || ""}
+                        onChange={(e) => handleInputChange("currentHeight", e.target.value)}
+                        placeholder="Ej. 14.2 hh ó 148 cm"
+                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                      />
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        En manos (hh) o centímetros.
+                      </p>
+                      {errors.currentHeight && (
+                        <p className="text-xs text-red-600 mt-1.5">{errors.currentHeight}</p>
+                      )}
+                    </div>
+
+                    {/* Fecha de Estatura Actual */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                        Fecha de Estatura Actual *
+                      </label>
+                      <input
+                        type="date"
+                        max={new Date().toISOString().split("T")[0]}
+                        value={formData.currentHeightDate || ""}
+                        onChange={(e) => handleInputChange("currentHeightDate", e.target.value)}
+                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                      />
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        Fecha en que se midió.
+                      </p>
+                      {errors.currentHeightDate && (
+                        <p className="text-xs text-red-600 mt-1.5">{errors.currentHeightDate}</p>
+                      )}
+                    </div>
+
+                    {/* Estatura Esperada */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                        Estatura Esperada *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.expectedHeight || ""}
+                        onChange={(e) => handleInputChange("expectedHeight", e.target.value)}
+                        placeholder="Ej. 14.2 hh ó 150 cm"
+                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                      />
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        Estatura estimada a la madurez.
+                      </p>
+                      {errors.expectedHeight && (
+                        <p className="text-xs text-red-600 mt-1.5">{errors.expectedHeight}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -840,7 +922,7 @@ export default function HorseRegistrationWizard({
                     {/* Number of passport */}
                     <div>
                       <label className="block text-sm font-medium text-zinc-800 mb-1.5">
-                        Número de Pasaporte *
+                        Número de Pasaporte (UELN) *
                       </label>
                       <input
                         type="text"
@@ -1114,6 +1196,19 @@ export default function HorseRegistrationWizard({
                       {formData.hasPassport ? `Sí (No. ${formData.passportNumber})` : "No posee"}
                     </strong>
                   </div>
+                  <div>
+                    <span className="text-zinc-400 block">Estatura Actual:</span>
+                    <strong className="text-zinc-900">
+                      {formData.currentHeight || "No especificada"}
+                      {formData.currentHeightDate ? ` (Medida el ${formData.currentHeightDate})` : ""}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 block">Estatura Esperada:</span>
+                    <strong className="text-zinc-900">
+                      {formData.expectedHeight || "No especificada"}
+                    </strong>
+                  </div>
                 </div>
 
                 {/* Pruebas de Color Seleccionadas en la Revisión */}
@@ -1233,7 +1328,7 @@ export default function HorseRegistrationWizard({
                     className="w-5 h-5 mt-0.5 text-zinc-900 rounded border-zinc-300 focus:ring-zinc-800 cursor-pointer"
                   />
                   <span className="text-xs text-zinc-700 leading-relaxed">
-                    He leído y acepto los términos de registro, el envío del kit de muestra capilar y la inclusión de los resultados genéticos en el certificado de registro de la GVHS México.
+                    He leído y acepto los términos de pre-registro, el envío del kit de muestra capilar y la inclusión de los resultados genéticos en el expediente y certificado de la GVHS México.
                   </span>
                 </label>
                 {errors.acknowledgePolicies && (
@@ -1293,7 +1388,7 @@ export default function HorseRegistrationWizard({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
-                    Pagar Registro y Enviar Solicitud
+                    Pagar Pre-Registro y Enviar Solicitud
                   </>
                 )}
               </button>

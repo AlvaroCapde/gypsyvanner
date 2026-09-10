@@ -336,7 +336,7 @@ export function calculateHorseFee(
   // Rule 1: Born in 2017 or earlier -> Hardship fee of $250 USD
   if (birthYear <= 2017) {
     ageCategory = "hardship";
-    categoryLabel = "Registro Tardío / Hardship (Nacidos en 2017 o antes)";
+    categoryLabel = "Pre-Registro Tardío / Hardship (Nacidos en 2017 o antes)";
     baseFeeUsd = 250;
     isHardship = true;
   } else if (months <= 6) {
@@ -407,6 +407,17 @@ export const horseRegistrationSchema = z
       .string()
       .min(2, "El país de nacimiento es requerido."),
 
+    // Medidas de estatura y alzada (Paso 1)
+    currentHeight: z
+      .string()
+      .min(1, "La estatura actual del caballo es requerida."),
+    currentHeightDate: z
+      .string()
+      .min(1, "La fecha de estatura actual es requerida."),
+    expectedHeight: z
+      .string()
+      .min(1, "La estatura esperada del caballo es requerida."),
+
     // Step 2: Pasaporte (Condicional)
     hasPassport: z.boolean().default(false),
     importDate: z.string().optional(),
@@ -427,7 +438,7 @@ export const horseRegistrationSchema = z
 
     // Step 5: Aceptación de políticas oficiales
     acknowledgePolicies: z.boolean().refine((val) => val === true, {
-      message: "Debe aceptar las políticas y directrices de registro de GVHS.",
+      message: "Debe aceptar las políticas y directrices de pre-registro de GVHS.",
     }),
     draftId: z.string().optional(),
   })

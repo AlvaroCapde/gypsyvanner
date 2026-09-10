@@ -12,6 +12,9 @@ interface RegistrationDetails {
   birthDate?: string;
   ageCategory?: string;
   countryOfBirth?: string;
+  currentHeight?: string;
+  currentHeightDate?: string;
+  expectedHeight?: string;
   subtotalFeeMxn?: number;
   platformFeeMxn?: number;
   totalFeeMxn?: number;
@@ -60,6 +63,9 @@ function ConfirmationContent() {
           birthDate: data.birthDate || data.registration?.birth_date,
           ageCategory: data.ageCategory || data.registration?.age_category,
           countryOfBirth: data.countryOfBirth || data.registration?.country_of_birth,
+          currentHeight: data.currentHeight || data.registration?.current_height,
+          currentHeightDate: data.currentHeightDate || data.registration?.current_height_date,
+          expectedHeight: data.expectedHeight || data.registration?.expected_height,
           subtotalFeeMxn: data.subtotalFeeMxn || data.registration?.subtotal_fee_mxn,
           platformFeeMxn: data.platformFeeMxn || data.registration?.platform_fee_mxn,
           totalFeeMxn: data.totalFeeMxn || data.registration?.total_fee_mxn || data.amountTotalMxn,
@@ -119,7 +125,7 @@ function ConfirmationContent() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
-        <h2 className="text-2xl font-serif text-zinc-950 mb-2">No se pudo verificar el registro</h2>
+        <h2 className="text-2xl font-serif text-zinc-950 mb-2">No se pudo verificar el pre-registro</h2>
         <p className="text-zinc-600 text-xs sm:text-sm mb-6">{error}</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
@@ -157,7 +163,7 @@ function ConfirmationContent() {
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-serif text-zinc-950 mb-2">
-          ¡Solicitud de Registro Enviada con Éxito!
+          ¡Solicitud de Pre-Registro Enviada con Éxito!
         </h1>
         <p className="text-xs sm:text-sm text-zinc-600 max-w-lg mx-auto leading-relaxed">
           Tu pago ha sido acreditado correctamente y el expediente oficial del ejemplar ha ingresado a revisión técnica de la Gypsy Vanner Horse Society México.
@@ -211,7 +217,7 @@ function ConfirmationContent() {
                   Tiempo de Espera
                 </span>
                 <p className="text-xs text-zinc-700 leading-relaxed">
-                  Tiempo de espera del trámite: <strong>2 meses</strong> aproximadamente para recepción de muestras, pruebas de ADN/PSSM1/FIS y emisión oficial.
+                  Tiempo de espera del trámite: <strong>2 meses</strong> aproximadamente para recepción de muestras y análisis de ADN/PSSM1/FIS en laboratorio.
                 </p>
               </div>
             </div>
@@ -273,6 +279,20 @@ function ConfirmationContent() {
 
           <div className="p-3.5 bg-zinc-50 rounded-lg border border-zinc-200/70">
             <span className="text-zinc-400 block text-[11px] uppercase tracking-wider mb-0.5">
+              Estatura Actual y Esperada
+            </span>
+            <strong className="text-zinc-900">
+              {details?.currentHeight ? `${details.currentHeight} (esperada: ${details.expectedHeight || "N/D"})` : "Pendiente"}
+            </strong>
+            {details?.currentHeightDate && (
+              <span className="block text-[10px] text-zinc-500 mt-0.5">
+                Medición al {details.currentHeightDate}
+              </span>
+            )}
+          </div>
+
+          <div className="p-3.5 bg-zinc-50 rounded-lg border border-zinc-200/70">
+            <span className="text-zinc-400 block text-[11px] uppercase tracking-wider mb-0.5">
               Estatus del Expediente
             </span>
             <span className="inline-flex items-center gap-1.5 font-semibold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200/60 text-xs">
@@ -316,7 +336,7 @@ function ConfirmationContent() {
             </span>
             <div>
               <strong className="text-zinc-900 block mb-0.5">Envío del Kit y Formato de ADN</strong>
-              Te notificaremos con el formato oficial para la toma de muestra capilar (pelo con raíz). El tiempo de espera del trámite es de aproximadamente 2 meses mientras se procesan los análisis genéticos en laboratorio.
+              Te notificaremos con el formato oficial para la toma de muestra capilar (pelo con raíz). El tiempo de espera es de aproximadamente 2 meses mientras se procesan los análisis genéticos en laboratorio.
             </div>
           </div>
 
@@ -325,8 +345,18 @@ function ConfirmationContent() {
               3
             </span>
             <div>
+              <strong className="text-zinc-900 block mb-0.5">Inspección Oficial GVHS (Marzo)</strong>
+              Con las pruebas genéticas concluidas y el expediente en orden, tu ejemplar deberá presentarse a la inspección oficial presencial evaluada por los jueces oficiales de la GVHS en marzo de 2026, donde se determinará si califica como Gypsy Vanner.
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-3.5 bg-white rounded-lg border border-zinc-200/70">
+            <span className="w-5 h-5 rounded-full bg-zinc-100 text-zinc-800 font-semibold flex items-center justify-center flex-shrink-0 text-xs">
+              4
+            </span>
+            <div>
               <strong className="text-zinc-900 block mb-0.5">Emisión del Certificado Oficial GVHS</strong>
-              Al concluir los análisis genéticos de ADN, PSSM1 y FIS, se expedirá tu Certificado Oficial de Registro con las pruebas asentadas al reverso. Podrás consultar el estatus en todo momento en tu Portal de Miembros.
+              Una vez aprobada la inspección oficial por los jueces de la GVHS, se expedirá tu Certificado Oficial de Registro con las pruebas asentadas al reverso. Podrás consultar el estatus en todo momento en tu Portal de Miembros.
             </div>
           </div>
         </div>

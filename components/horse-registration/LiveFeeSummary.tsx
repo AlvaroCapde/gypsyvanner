@@ -32,7 +32,7 @@ export default function LiveFeeSummary({
       <div className="p-5 space-y-3.5 text-sm">
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-zinc-800 block font-medium">Tarifa Base de Registro</span>
+            <span className="text-zinc-800 block font-medium">Tarifa Base de Pre-Registro</span>
             <span className="text-[11px] text-zinc-500">
               {feeBreakdown.isHardship ? "Nacido en 2017 o antes" : `Según edad: ${feeBreakdown.ageFormatted}`}
             </span>

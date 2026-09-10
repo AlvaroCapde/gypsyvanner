@@ -19,7 +19,7 @@ export default function DocumentosLayout({
           </Link>
           <Link href="/registro" className="text-zinc-400 text-sm tracking-wide hover:text-white transition-colors flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Volver a Registro
+            Volver a Pre-Registro
           </Link>
         </div>
       </header>

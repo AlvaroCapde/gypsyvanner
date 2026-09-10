@@ -79,7 +79,7 @@ export default function ColorTestingStep({
           Pruebas Genéticas de Color y Patrones
         </h2>
         <p className="text-sm text-zinc-500 mt-1">
-          Selecciona las pruebas adicionales de color que deseas realizar para tu ejemplar. Cada prueba tiene una tarifa oficial de <strong>{formatCurrencyMxn(COLOR_TEST_FEE_MXN)}</strong> ($25 USD) y los resultados se certificarán en su registro oficial.
+          Selecciona las pruebas adicionales de color que deseas realizar para tu ejemplar. Cada prueba tiene una tarifa oficial de <strong>{formatCurrencyMxn(COLOR_TEST_FEE_MXN)}</strong> ($25 USD) y los resultados se certificarán en su pre-registro y registro oficial.
         </p>
       </div>
 

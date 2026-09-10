@@ -28,10 +28,10 @@ const FAQS: FAQItem[] = [
   },
   {
     id: "tiempo",
-    question: "¿Cuánto es el tiempo de espera del trámite de registro?",
+    question: "¿Cuánto es el tiempo de espera del trámite de pre-registro?",
     answer: (
       <p>
-        El tiempo de espera estimado del trámite es de <strong className="font-semibold text-zinc-900">2 meses</strong>. Este periodo contempla la revisión morfológica de fotografías, la recepción y análisis de muestras para ADN, PSSM1 y FIS en laboratorio especializado, y la emisión oficial del certificado.
+        El tiempo de espera estimado del trámite es de <strong className="font-semibold text-zinc-900">2 meses</strong>. Este periodo contempla la revisión morfológica de fotografías, la recepción y análisis de muestras para ADN, PSSM1 y FIS en laboratorio especializado.
       </p>
     ),
   },
@@ -46,7 +46,7 @@ const FAQS: FAQItem[] = [
   },
   {
     id: "membresia",
-    question: "¿Es obligatoria la membresía para registrar un caballo?",
+    question: "¿Es obligatoria la membresía para pre-registrar un caballo?",
     answer: (
       <p>
         Sí. Contar con una{" "}
@@ -56,7 +56,16 @@ const FAQS: FAQItem[] = [
         >
           Membresía Oficial activa
         </Link>{" "}
-        de GVHS México es indispensable para poder registrar ejemplares y acceder a los libros genealógicos de la raza.
+        de GVHS México es indispensable para poder pre-registrar ejemplares y acceder a los libros genealógicos de la raza.
+      </p>
+    ),
+  },
+  {
+    id: "certificacion-inspeccion",
+    question: "¿El pago de membresía y pre-registro asegura que mi caballo será certificado como Gypsy Vanner?",
+    answer: (
+      <p>
+        <strong className="font-semibold text-zinc-900">No.</strong> El pago cubre los derechos de gestión del trámite, análisis de laboratorio y evaluación del expediente. La determinación y decisión de si el ejemplar califica como <strong className="font-semibold text-zinc-900">Gypsy Vanner</strong> y puede ser certificado la realizarán exclusivamente los <strong className="font-semibold text-zinc-900">jueces oficiales de GVHS</strong> en la <strong className="font-semibold text-zinc-900">inspección oficial en Mexico en Marzo 2027</strong>, tras la revisión de sus pruebas genéticas y morfológicas.
       </p>
     ),
   },
@@ -78,7 +87,7 @@ export default function FAQ() {
             Preguntas Frecuentes
           </p>
           <h2 className="font-serif text-3xl sm:text-4xl text-zinc-950">
-            Dudas comunes sobre el registro
+            Dudas comunes sobre el pre-registro
           </h2>
         </div>
 

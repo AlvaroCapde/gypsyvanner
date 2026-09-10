@@ -277,7 +277,7 @@ export default function MembershipForm() {
       </div>
 
       {/* Acuerdos Legales */}
-      <div className="mb-12 bg-zinc-50 p-6 ring-1 ring-zinc-200">
+      <div className="mb-8 bg-zinc-50 p-6 ring-1 ring-zinc-200">
         <label className="flex items-start gap-4 cursor-pointer">
           <input type="checkbox" {...register("acknowledgeRules")} className="mt-1 w-5 h-5 accent-red-700 flex-shrink-0" />
           <div className="font-sans text-sm text-zinc-700 leading-relaxed">
@@ -285,6 +285,16 @@ export default function MembershipForm() {
           </div>
         </label>
         {errors.acknowledgeRules && <p className="mt-3 text-sm text-red-600">{errors.acknowledgeRules.message}</p>}
+      </div>
+
+      {/* Aviso sutil de registro de ejemplares */}
+      <div className="mb-8 p-4 bg-amber-50/50 border border-amber-200/70 rounded-sm text-xs text-zinc-600 flex items-start gap-3 leading-relaxed">
+        <svg className="w-4 h-4 text-amber-600/90 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p>
+          <strong className="text-zinc-800 font-medium">Nota sobre registro de ejemplares:</strong> Si adquieres tu membresía para el registro de caballos, ten en cuenta que no se admiten ejemplares con problemas testiculares y de mandíbula (prognata y agnata).
+        </p>
       </div>
 
       {/* Submit */}

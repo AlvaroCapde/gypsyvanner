@@ -48,7 +48,7 @@ export default function Hero() {
 
           <Link href="/registro" className="group relative inline-flex items-center justify-center bg-red-700 text-white font-sans text-sm tracking-wider uppercase font-medium px-8 py-4 overflow-hidden transition-all duration-500 hover:bg-red-800">
             <span className="relative z-10 flex items-center gap-3">
-              Explorar el Registro
+              Explorar el Pre-Registro
               <svg
                 className="w-4 h-4 transform transition-transform duration-500 group-hover:translate-x-2"
                 fill="none"

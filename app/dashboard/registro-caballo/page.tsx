@@ -82,13 +82,13 @@ export default async function RegistroCaballoPage() {
               Dashboard
             </Link>
             <span>/</span>
-            <span className="text-red-700 font-semibold">Registro de Caballo</span>
+            <span className="text-red-700 font-semibold">Pre-Registro de Caballo</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl font-serif text-zinc-950 font-medium">
-                Solicitud de Registro
+                Solicitud de Pre-Registro
               </h1>
             </div>
 
@@ -106,7 +106,7 @@ export default async function RegistroCaballoPage() {
           fallback={
             <div className="bg-white border border-zinc-200 rounded-xl p-12 text-center max-w-xl mx-auto shadow-sm">
               <div className="w-10 h-10 border-3 border-zinc-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-zinc-500 text-xs">Cargando formulario de registro...</p>
+              <p className="text-zinc-500 text-xs">Cargando formulario de pre-registro...</p>
             </div>
           }
         >

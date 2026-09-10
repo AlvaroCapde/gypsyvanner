@@ -14,6 +14,9 @@ interface HorseRegistration {
   gender: "stallion" | "mare";
   birth_date: string;
   country_of_birth: string;
+  current_height?: string | null;
+  current_height_date?: string | null;
+  expected_height?: string | null;
   has_passport: boolean;
   import_date?: string | null;
   passport_number?: string | null;
@@ -71,7 +74,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
     }
 
     const confirmed = window.confirm(
-      `¿Estás seguro de que deseas eliminar el borrador de registro para "${horse.horse_name}"?\n\nEsta acción cancelará la solicitud preliminar de forma permanente.`
+      `¿Estás seguro de que deseas eliminar el borrador de pre-registro para "${horse.horse_name}"?\n\nEsta acción cancelará la solicitud preliminar de forma permanente.`
     );
     if (!confirmed) return;
 
@@ -85,7 +88,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "No se pudo eliminar la solicitud de registro.");
+        throw new Error(data.error || "No se pudo eliminar la solicitud de pre-registro.");
       }
 
       // Quitar de la lista local
@@ -181,7 +184,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <h3 className="text-xl font-serif text-zinc-900 mb-2">Aún no tienes caballos registrados</h3>
+        <h3 className="text-xl font-serif text-zinc-900 mb-2">Aún no tienes caballos pre-registrados</h3>
         <p className="text-sm text-zinc-500 font-sans max-w-md mx-auto mb-6">
           Asegura el linaje de tus ejemplares para incluirlos en el padrón de caballos fundadores de GVHS México.
         </p>
@@ -189,7 +192,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
           href="/dashboard/registro-caballo"
           className="inline-flex items-center justify-center bg-zinc-950 text-white font-sans text-xs tracking-wider uppercase font-medium px-8 py-3.5 hover:bg-zinc-800 transition-colors"
         >
-          Iniciar Proceso de Registro
+          Iniciar Proceso de Pre-Registro
         </Link>
       </div>
     );
@@ -419,7 +422,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                 {/* Datos de Identidad y Linaje */}
                 <div className="bg-zinc-50/70 border border-zinc-200 rounded-lg p-5">
                   <h4 className="font-serif text-sm font-semibold text-zinc-900 mb-3 border-b border-zinc-200/70 pb-2">
-                    Datos de Registro e Identidad
+                    Datos de Pre-Registro e Identidad
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
@@ -437,7 +440,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                       <strong className="text-zinc-900">{selectedHorse.birth_date}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-400 block text-[11px]">Categoría de Registro:</span>
+                      <span className="text-zinc-400 block text-[11px]">Categoría de Pre-Registro:</span>
                       <strong className="text-zinc-900">{selectedHorse.age_category}</strong>
                     </div>
                     <div>
@@ -448,10 +451,23 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                       <span className="text-zinc-400 block text-[11px]">Fecha de Adquisición:</span>
                       <strong className="text-zinc-900">{selectedHorse.acquisition_date}</strong>
                     </div>
+                    <div>
+                      <span className="text-zinc-400 block text-[11px]">Estatura Actual:</span>
+                      <strong className="text-zinc-900">
+                        {selectedHorse.current_height || "No registrada"}
+                        {selectedHorse.current_height_date ? ` (Medida: ${selectedHorse.current_height_date})` : ""}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-zinc-400 block text-[11px]">Estatura Esperada:</span>
+                      <strong className="text-zinc-900">
+                        {selectedHorse.expected_height || "No registrada"}
+                      </strong>
+                    </div>
                     {selectedHorse.has_passport && (
                       <>
                         <div>
-                          <span className="text-zinc-400 block text-[11px]">Número de Pasaporte:</span>
+                          <span className="text-zinc-400 block text-[11px]">Número de Pasaporte (UELN):</span>
                           <strong className="text-zinc-900">{selectedHorse.passport_number || "Sí"}</strong>
                         </div>
                         <div>
@@ -548,7 +564,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
 
                       <div className="space-y-2.5 text-xs">
                         <div className="flex justify-between items-center text-zinc-700">
-                          <span>Tarifa Base de Registro ({selectedHorse.age_category})</span>
+                          <span>Tarifa Base de Pre-Registro ({selectedHorse.age_category})</span>
                           <span className="font-medium text-zinc-900">{formatCurrencyMxn(baseMxn)}</span>
                         </div>
 
