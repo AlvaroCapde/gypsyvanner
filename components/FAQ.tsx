@@ -69,6 +69,22 @@ const FAQS: FAQItem[] = [
       </p>
     ),
   },
+  {
+    id: "requisitos-inspeccion",
+    question: "¿Qué requisitos necesito cumplir para participar en la inspección oficial?",
+    answer: (
+      <p>
+        <strong className="font-semibold text-zinc-900">Es indispensable</strong> contar con tu{" "}
+        <Link
+          href="/membresia"
+          className="text-red-700 hover:text-red-800 font-medium underline underline-offset-4"
+        >
+          Membresía Oficial activa
+        </Link>{" "}
+        y haber completado todos los <strong className="font-semibold text-zinc-900">requerimientos de pre-registro</strong> (expediente fotográfico, microchip y resultados de pruebas genéticas de ADN, PSSM1 y FIS) para que tu caballo pueda ser inscrito y evaluado por los jueces oficiales de la GVHS.
+      </p>
+    ),
+  },
 ];
 
 export default function FAQ() {

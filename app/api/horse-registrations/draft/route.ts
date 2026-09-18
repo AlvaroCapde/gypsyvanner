@@ -47,6 +47,9 @@ export async function GET(request: Request) {
     // Mapear campos de la base de datos al formato HorseRegistrationFormData
     const draftData = {
       horseName: record.horse_name || "",
+      farmPrefix: record.farm_prefix || "",
+      wantsToPurchasePrefix: Boolean(record.is_purchasing_prefix),
+      hasExistingPrefix: Boolean(record.farm_prefix && !record.is_purchasing_prefix),
       ownerName: record.owner_name || "",
       acquisitionDate: record.acquisition_date || "",
       gender: (record.gender === "mare" ? "mare" : "stallion") as "stallion" | "mare",

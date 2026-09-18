@@ -156,19 +156,19 @@ export default function PhotoUploadGuide({
   return (
     <div className="space-y-8">
       {/* Guía Banner */}
-      <div className="bg-amber-50/90 border border-amber-200 p-5 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-        <div className="flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center flex-shrink-0 mt-0.5 border border-amber-200">
+      <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-zinc-950 shadow-xs">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
             </svg>
           </div>
           <div>
-            <h4 className="font-serif font-semibold text-amber-950 text-sm sm:text-base">
+            <h4 className="font-serif font-semibold text-zinc-950 text-base">
               Guía Oficial para Fotografías Reglamentarias GVHS
             </h4>
-            <p className="text-xs sm:text-sm text-amber-900/90 mt-0.5 leading-relaxed">
-              Se requieren <strong>4 fotografías completas de orejas a cascos</strong>. El visor muestra el <strong>100% de la foto sin recortes</strong> para que verifiques que no falte ninguna parte del caballo antes de enviar.
+            <p className="text-xs sm:text-sm text-zinc-600 mt-1 leading-relaxed font-sans">
+              Se requieren <strong>4 fotografías completas de orejas a cascos</strong>. El visor inspecciona el <strong>100% del encuadre sin recortes</strong> para garantizar que el ejemplar cumpla con los estándares de emisión del certificado.
             </p>
           </div>
         </div>
@@ -176,9 +176,9 @@ export default function PhotoUploadGuide({
         <button
           type="button"
           onClick={() => setShowGuideModal(true)}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-amber-300 text-amber-950 text-xs font-semibold uppercase tracking-wider rounded shadow-xs hover:bg-amber-100/60 transition-colors flex-shrink-0 cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-white border border-zinc-300 text-zinc-900 text-xs font-semibold uppercase tracking-wider rounded-md shadow-xs hover:bg-zinc-50 transition-colors flex-shrink-0 cursor-pointer"
         >
-          <svg className="w-4 h-4 text-amber-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
@@ -196,13 +196,13 @@ export default function PhotoUploadGuide({
           return (
             <div
               key={slot.key}
-              className={`bg-white border rounded-xl p-5 transition-all flex flex-col justify-between shadow-xs ${
+              className={`bg-white border rounded-xl p-6 transition-all flex flex-col justify-between shadow-xs ${
                 hasError
-                  ? "border-red-400 ring-2 ring-red-200"
+                  ? "border-red-600 ring-1 ring-red-600"
                   : photoValue
-                  ? "border-emerald-300 bg-emerald-50/5"
+                  ? "border-zinc-300 bg-white"
                   : isDragging
-                  ? "border-zinc-900 bg-zinc-50 ring-2 ring-zinc-300"
+                  ? "border-zinc-950 bg-zinc-50 ring-1 ring-zinc-950"
                   : "border-zinc-200 hover:border-zinc-300"
               }`}
             >
@@ -210,7 +210,7 @@ export default function PhotoUploadGuide({
                 {/* Cabecera del Slot */}
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <h5 className="font-serif text-base font-semibold text-zinc-900">
+                    <h5 className="font-serif text-base font-semibold text-zinc-950">
                       {slot.title}
                     </h5>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">
@@ -219,18 +219,16 @@ export default function PhotoUploadGuide({
                   </div>
 
                   {photoValue ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-semibold rounded-full">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                      </svg>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-zinc-950 text-white text-[10px] font-mono font-medium rounded">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
                       Cargada
                     </span>
                   ) : (
-                    <span className="text-[11px] text-red-600 font-semibold">* Requerida</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-red-700 font-semibold">* Requerida</span>
                   )}
                 </div>
 
-                <p className="text-xs text-zinc-500 mb-4 leading-relaxed">{slot.subtitle}</p>
+                <p className="text-xs text-zinc-500 mb-4 leading-relaxed font-sans">{slot.subtitle}</p>
 
                 {/* Input de archivo oculto para reuso en Subir y Cambiar */}
                 <input
@@ -400,9 +398,9 @@ export default function PhotoUploadGuide({
                     isOfficialExample: true,
                   })
                 }
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-950 font-medium mt-2 self-start cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-zinc-600 hover:text-red-700 font-medium mt-2 self-start cursor-pointer transition-colors"
               >
-                <svg className="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Ver ejemplo oficial de este ángulo
@@ -443,9 +441,9 @@ export default function PhotoUploadGuide({
 
             {/* Puntos Clave */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-lg text-xs leading-relaxed text-zinc-700 space-y-2">
-                <p className="font-semibold text-zinc-900 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+              <div className="p-5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs leading-relaxed text-zinc-700 space-y-2 font-sans">
+                <p className="font-serif font-semibold text-zinc-950 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-700" />
                   Reglas Fundamentales:
                 </p>
                 <ul className="list-disc pl-4 space-y-1 text-zinc-600">
@@ -455,9 +453,9 @@ export default function PhotoUploadGuide({
                 </ul>
               </div>
 
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-lg text-xs leading-relaxed text-zinc-700 space-y-2">
-                <p className="font-semibold text-zinc-900 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-600" />
+              <div className="p-5 bg-zinc-50 border border-zinc-200 rounded-xl text-xs leading-relaxed text-zinc-700 space-y-2 font-sans">
+                <p className="font-serif font-semibold text-zinc-950 text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-zinc-950" />
                   Encuadre de la Toma Trasera:
                 </p>
                 <ul className="list-disc pl-4 space-y-1 text-zinc-600">
@@ -472,7 +470,7 @@ export default function PhotoUploadGuide({
             <div className="space-y-6 mb-8">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-serif text-lg text-zinc-900">
+                  <h4 className="font-serif text-lg text-zinc-950 font-semibold">
                     1. Vistas Laterales (Encuadre Horizontal)
                   </h4>
                   <span className="text-xs text-zinc-500 font-mono">
@@ -483,7 +481,7 @@ export default function PhotoUploadGuide({
                   {PHOTO_SLOTS.filter((s) => s.orientation === "landscape").map((slot) => (
                     <div
                       key={slot.key}
-                      className="bg-zinc-100 border border-zinc-200 rounded-lg overflow-hidden flex flex-col justify-between"
+                      className="bg-zinc-100 border border-zinc-200 rounded-xl overflow-hidden flex flex-col justify-between"
                     >
                       <div className="relative aspect-[4/3] bg-zinc-950 flex items-center justify-center p-2">
                         <img
@@ -506,11 +504,11 @@ export default function PhotoUploadGuide({
                           🔍 Ampliar
                         </button>
                       </div>
-                      <div className="p-3 bg-white border-t border-zinc-200">
-                        <span className="text-xs font-semibold text-zinc-900 block">
+                      <div className="p-3.5 bg-white border-t border-zinc-200">
+                        <span className="text-xs font-semibold text-zinc-950 block font-serif">
                           {slot.title}
                         </span>
-                        <span className="text-[11px] text-zinc-500 block mt-0.5">
+                        <span className="text-[11px] text-zinc-500 block mt-0.5 font-sans">
                           {slot.tip}
                         </span>
                       </div>
@@ -521,7 +519,7 @@ export default function PhotoUploadGuide({
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-serif text-lg text-zinc-900">
+                  <h4 className="font-serif text-lg text-zinc-950 font-semibold">
                     2. Vistas Frontal y Trasera (Encuadre Vertical)
                   </h4>
                   <span className="text-xs text-zinc-500 font-mono">
@@ -532,7 +530,7 @@ export default function PhotoUploadGuide({
                   {PHOTO_SLOTS.filter((s) => s.orientation === "portrait").map((slot) => (
                     <div
                       key={slot.key}
-                      className="bg-zinc-100 border border-zinc-200 rounded-lg overflow-hidden flex flex-col justify-between"
+                      className="bg-zinc-100 border border-zinc-200 rounded-xl overflow-hidden flex flex-col justify-between"
                     >
                       <div className="relative aspect-[3/4] max-h-[380px] bg-zinc-950 flex items-center justify-center p-2">
                         <img
@@ -555,11 +553,11 @@ export default function PhotoUploadGuide({
                           🔍 Ampliar
                         </button>
                       </div>
-                      <div className="p-3 bg-white border-t border-zinc-200">
-                        <span className="text-xs font-semibold text-zinc-900 block">
+                      <div className="p-3.5 bg-white border-t border-zinc-200">
+                        <span className="text-xs font-semibold text-zinc-950 block font-serif">
                           {slot.title}
                         </span>
-                        <span className="text-[11px] text-zinc-500 block mt-0.5">
+                        <span className="text-[11px] text-zinc-500 block mt-0.5 font-sans">
                           {slot.tip}
                         </span>
                       </div>
@@ -573,7 +571,7 @@ export default function PhotoUploadGuide({
               <button
                 type="button"
                 onClick={() => setShowGuideModal(false)}
-                className="px-6 py-2.5 bg-zinc-950 text-white rounded text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 cursor-pointer transition-colors"
+                className="px-6 py-2.5 bg-zinc-950 text-white rounded-md text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 cursor-pointer transition-colors"
               >
                 Entendido, Continuar con la Carga
               </button>

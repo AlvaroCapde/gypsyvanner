@@ -7,13 +7,13 @@ export default function HowToTakePhotosPage() {
         Este es uno de los pasos importantes al registrar su Caballo Gypsy Vanner. Se requiere que envíe <strong>4 fotos</strong> de su caballo; una de cada lado, una directamente de frente y una directamente de la parte trasera.
       </p>
       
-      <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 my-8">
-        <ul className="text-amber-900 m-0 space-y-2">
-          <li><strong>Las fotos no deben superar los 640 kb.</strong></li>
-          <li>El caballo debe ocupar la mayor parte del espacio de la foto.</li>
-          <li>Las fotos se utilizan para la aprobación del registro y para la identificación del caballo.</li>
-          <li>Las fotos laterales aparecerán en el certificado de registro.</li>
-          <li>Las fotos deben ser actuales (recientes).</li>
+      <div className="bg-zinc-50 p-6 rounded-xl border border-zinc-200 border-l-4 border-l-zinc-950 my-8 shadow-xs">
+        <ul className="text-zinc-700 font-sans text-sm m-0 space-y-2">
+          <li><strong>Las fotos deben ser nítidas y en alta resolución.</strong></li>
+          <li>El caballo debe ocupar la mayor parte del espacio de la foto sin recortes en orejas o cascos.</li>
+          <li>Las fotos se utilizan para la aprobación del registro y para la identificación oficial del ejemplar.</li>
+          <li>Las tomas laterales aparecerán grabadas e impresas en el certificado de registro oficial.</li>
+          <li>Las fotografías deben ser actuales y recientes.</li>
         </ul>
       </div>
 

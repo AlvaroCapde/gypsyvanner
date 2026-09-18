@@ -9,6 +9,10 @@ interface HorseRegistration {
   id: string;
   user_id: string;
   horse_name: string;
+  farm_prefix?: string | null;
+  is_purchasing_prefix?: boolean;
+  prefix_fee_usd?: number | null;
+  prefix_fee_mxn?: number | null;
   owner_name: string;
   acquisition_date: string;
   gender: "stallion" | "mare";
@@ -100,19 +104,15 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith("gvhs_horse_reg_draft")) {
-            const item = localStorage.getItem(key);
-            if (item && item.includes(horse.id)) {
-              localStorage.removeItem(key);
-            }
+            localStorage.removeItem(key);
           }
         }
       } catch {}
 
-      setActionSuccess(`La solicitud de "${horse.horse_name}" ha sido eliminada con éxito.`);
-      setTimeout(() => setActionSuccess(""), 4500);
+      setActionSuccess(`La solicitud de pre-registro para "${horse.horse_name}" ha sido eliminada.`);
     } catch (err: any) {
-      console.error("Error al eliminar borrador:", err);
-      setDeleteError(err.message || "Ocurrió un error al intentar eliminar la solicitud.");
+      console.error("Error eliminando borrador:", err);
+      setDeleteError(err.message || "Ocurrió un error al eliminar el borrador.");
     } finally {
       setIsDeleting(false);
     }
@@ -121,45 +121,52 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
   const getStatusBadge = (status: string, paymentStatus?: string | null) => {
     if (paymentStatus === "unpaid" || status === "pending_payment") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500/90 backdrop-blur-xs text-white text-[11px] font-mono font-medium rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 text-zinc-950 border border-zinc-300 text-[10px] font-mono uppercase tracking-wider shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-700 animate-pulse" />
           Pago Pendiente
         </span>
       );
     }
+
     switch (status) {
-      case "under_review":
       case "submitted":
+      case "under_review":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 bg-blue-600/90 backdrop-blur-xs text-white text-[11px] font-mono font-medium rounded-full">
-            En Revisión
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-950 text-white text-[10px] font-mono uppercase tracking-wider shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+            En Revisión Oficial
           </span>
         );
       case "dna_kit_sent":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 bg-amber-600/90 backdrop-blur-xs text-white text-[11px] font-mono font-medium rounded-full">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 text-zinc-900 border border-zinc-200 text-[10px] font-mono uppercase tracking-wider shadow-2xs">
             Kit ADN Enviado
           </span>
         );
       case "approved":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 bg-emerald-600/90 backdrop-blur-xs text-white text-[11px] font-mono font-medium rounded-full">
-            Registrado Oficial
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 text-zinc-950 border border-zinc-300 text-[10px] font-mono uppercase tracking-wider shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
+            Aprobado y Registrado
           </span>
         );
       case "rejected":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 bg-red-600/90 backdrop-blur-xs text-white text-[11px] font-mono font-medium rounded-full">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-50 text-red-900 border border-red-200 text-[10px] font-mono uppercase tracking-wider shadow-2xs">
             Rechazado
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 bg-zinc-800/90 backdrop-blur-xs text-white text-[11px] font-mono font-medium rounded-full">
-            En Trámite
+          <span className="inline-flex items-center px-2.5 py-1 rounded bg-zinc-100 text-zinc-800 border border-zinc-200 text-[10px] font-mono uppercase tracking-wider">
+            {status}
           </span>
         );
     }
+  };
+
+  const formatGender = (gender: string) => {
+    return gender === "stallion" ? "Semental" : "Yegua";
   };
 
   const formatDate = (dateStr?: string | null) => {
@@ -176,23 +183,28 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
     }
   };
 
-  if (horsesList.length === 0) {
+  if (!horsesList || horsesList.length === 0) {
     return (
-      <div className="bg-white border border-zinc-200 p-10 md:p-14 text-center">
-        <div className="w-16 h-16 bg-zinc-100 text-zinc-400 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="bg-white border border-zinc-200 rounded-xl p-12 text-center max-w-xl mx-auto shadow-xs">
+        <div className="w-16 h-16 bg-red-50 text-red-700 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.5"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         </div>
-        <h3 className="text-xl font-serif text-zinc-900 mb-2">Aún no tienes caballos pre-registrados</h3>
-        <p className="text-sm text-zinc-500 font-sans max-w-md mx-auto mb-6">
-          Asegura el linaje de tus ejemplares para incluirlos en el padrón de caballos fundadores de GVHS México.
+        <h3 className="text-xl font-serif text-zinc-900 mb-2">No tienes caballos pre-registrados</h3>
+        <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">
+          Inicia hoy el pre-registro de tus ejemplares para garantizar su autenticidad, linaje oficial y valor como fundadores en México.
         </p>
         <Link
           href="/dashboard/registro-caballo"
-          className="inline-flex items-center justify-center bg-zinc-950 text-white font-sans text-xs tracking-wider uppercase font-medium px-8 py-3.5 hover:bg-zinc-800 transition-colors"
+          className="inline-flex items-center justify-center px-6 py-3 bg-red-700 hover:bg-red-800 text-white text-xs font-medium uppercase tracking-wider rounded transition-colors shadow-sm"
         >
-          Iniciar Proceso de Pre-Registro
+          Iniciar Nuevo Pre-Registro
         </Link>
       </div>
     );
@@ -217,6 +229,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {horsesList.map((horse) => {
           const isPending = horse.payment_status === "unpaid" || horse.status === "pending_payment";
+          const displayName = horse.farm_prefix ? `${horse.farm_prefix} ${horse.horse_name}` : horse.horse_name;
 
           return (
             <div
@@ -229,7 +242,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                 {horse.photo_left_url ? (
                   <img
                     src={horse.photo_left_url}
-                    alt={horse.horse_name}
+                    alt={displayName}
                     className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                   />
                 ) : (
@@ -254,10 +267,10 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                 <div>
                   <div className="flex items-baseline justify-between gap-2 mb-1">
                     <h3 className="font-serif text-lg font-bold text-zinc-950 truncate group-hover:text-red-700 transition-colors">
-                      {horse.horse_name}
+                      {displayName}
                     </h3>
                     <span className="text-xs text-zinc-500 font-sans flex-shrink-0">
-                      {horse.gender === "stallion" ? "Semental" : "Yegua"}
+                      {formatGender(horse.gender)}
                     </span>
                   </div>
 
@@ -337,7 +350,9 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                     {getStatusBadge(selectedHorse.status, selectedHorse.payment_status)}
                   </div>
                   <h2 className="text-2xl font-serif font-bold text-zinc-950">
-                    {selectedHorse.horse_name}
+                    {selectedHorse.farm_prefix
+                      ? `${selectedHorse.farm_prefix} ${selectedHorse.horse_name}`
+                      : selectedHorse.horse_name}
                   </h2>
                 </div>
                 <button
@@ -525,6 +540,9 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                   const baseMxn = Number(selectedHorse.base_fee_mxn) || 0;
                   const dnaMxn = Number(selectedHorse.dna_fee_mxn) || 0;
                   const pssmMxn = Number(selectedHorse.pssm_fis_fee_mxn) || 0;
+                  const prefixMxn = selectedHorse.is_purchasing_prefix
+                    ? Number(selectedHorse.prefix_fee_mxn) || 3600
+                    : 0;
                   const colorTestsMxn =
                     selectedHorse.color_tests_fee_mxn !== undefined && selectedHorse.color_tests_fee_mxn !== null
                       ? Number(selectedHorse.color_tests_fee_mxn)
@@ -532,7 +550,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                   const subtotal =
                     selectedHorse.subtotal_fee_mxn !== undefined && selectedHorse.subtotal_fee_mxn !== null
                       ? Number(selectedHorse.subtotal_fee_mxn)
-                      : baseMxn + dnaMxn + pssmMxn + colorTestsMxn;
+                      : baseMxn + dnaMxn + pssmMxn + prefixMxn + colorTestsMxn;
 
                   const { platformFeeMxn: calcFee, totalMxn: calcTotal } = calculatePlatformFee(subtotal);
                   const platformFee =
@@ -544,61 +562,68 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                     Number(selectedHorse.total_fee_mxn) || calcTotal;
 
                   return (
-                    <div className="bg-white border border-zinc-200 rounded-lg p-5 shadow-xs">
-                      <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-3">
+                    <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-xs">
+                      <div className="flex items-center justify-between border-b border-zinc-200 pb-3 mb-4">
                         <h4 className="font-serif text-sm font-semibold text-zinc-950">
                           {isPending ? "Desglose de Tarifas Pendientes" : "Desglose Oficial de lo Pagado"}
                         </h4>
                         {isPending ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-950 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-700 animate-pulse" />
                             Pendiente de Pago
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-950 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
                             Pago Acreditado
                           </span>
                         )}
                       </div>
 
-                      <div className="space-y-2.5 text-xs">
+                      <div className="space-y-2.5 text-xs font-sans">
                         <div className="flex justify-between items-center text-zinc-700">
                           <span>Tarifa Base de Pre-Registro ({selectedHorse.age_category})</span>
-                          <span className="font-medium text-zinc-900">{formatCurrencyMxn(baseMxn)}</span>
+                          <span className="font-medium text-zinc-950 font-mono">{formatCurrencyMxn(baseMxn)}</span>
                         </div>
 
                         <div className="flex justify-between items-center text-zinc-700">
                           <span>Prueba de ADN Obligatoria (Linaje de Raza)</span>
-                          <span className="font-medium text-zinc-900">{formatCurrencyMxn(dnaMxn)}</span>
+                          <span className="font-medium text-zinc-950 font-mono">{formatCurrencyMxn(dnaMxn)}</span>
                         </div>
 
                         <div className="flex justify-between items-center text-zinc-700">
                           <span>Panel Diagnóstico Obligatorio (PSSM1 y FIS)</span>
-                          <span className="font-medium text-zinc-900">{formatCurrencyMxn(pssmMxn)}</span>
+                          <span className="font-medium text-zinc-950 font-mono">{formatCurrencyMxn(pssmMxn)}</span>
                         </div>
+
+                        {prefixMxn > 0 && (
+                          <div className="flex justify-between items-center text-zinc-700">
+                            <span>Registro de Prefijo Oficial ({selectedHorse.farm_prefix})</span>
+                            <span className="font-medium text-red-700 font-mono">{formatCurrencyMxn(prefixMxn)}</span>
+                          </div>
+                        )}
 
                         {colorTestsMxn > 0 && (
                           <div className="flex justify-between items-center text-zinc-700">
                             <span>
                               Pruebas Genéticas de Color ({selectedHorse.selected_color_tests?.length || Math.round(colorTestsMxn / 450)})
                             </span>
-                            <span className="font-medium text-zinc-900">{formatCurrencyMxn(colorTestsMxn)}</span>
+                            <span className="font-medium text-zinc-950 font-mono">{formatCurrencyMxn(colorTestsMxn)}</span>
                           </div>
                         )}
 
-                        <div className="flex justify-between items-baseline pt-3 border-t border-zinc-200">
+                        <div className="flex justify-between items-baseline pt-3.5 border-t border-zinc-200">
                           <div>
-                            <span className="text-xs uppercase tracking-wider font-bold text-zinc-950 block">
+                            <span className="text-xs uppercase tracking-wider font-bold text-zinc-950 block font-mono">
                               {isPending ? "Total Oficial a Pagar" : "Total Oficial Pagado"}
                             </span>
-                            <span className="text-[10px] text-zinc-500">
+                            <span className="text-[10px] text-zinc-500 font-sans">
                               {isPending
                                 ? `Iniciado: ${formatDate(selectedHorse.created_at)}`
                                 : `Fecha de pago: ${formatDate(selectedHorse.paid_at || selectedHorse.created_at)}`}
                             </span>
                           </div>
-                          <span className="text-lg font-bold text-zinc-950">
+                          <span className="text-xl font-serif font-bold text-zinc-950">
                             {formatCurrencyMxn(subtotal, true)}
                           </span>
                         </div>
@@ -616,7 +641,7 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                       type="button"
                       disabled={isDeleting}
                       onClick={() => handleDeleteDraft(selectedHorse)}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-red-700 hover:text-white bg-white hover:bg-red-700 border border-red-300 hover:border-red-700 rounded transition-colors disabled:opacity-50 cursor-pointer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-zinc-700 hover:text-red-700 bg-white hover:bg-zinc-100 border border-zinc-300 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {isDeleting ? (
                         <>
@@ -637,13 +662,13 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                       <button
                         type="button"
                         onClick={() => setSelectedHorse(null)}
-                        className="w-full sm:w-auto px-5 py-2.5 bg-white border border-zinc-300 text-zinc-700 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 transition-colors rounded cursor-pointer text-center"
+                        className="w-full sm:w-auto px-5 py-2.5 bg-white border border-zinc-300 text-zinc-700 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 transition-colors rounded-md cursor-pointer text-center"
                       >
                         Cerrar
                       </button>
                       <Link
                         href={`/dashboard/registro-caballo?draft_id=${selectedHorse.id}`}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-red-700 text-white text-xs font-semibold uppercase tracking-wider hover:bg-red-800 transition-colors rounded shadow-xs text-center"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-red-700 text-white text-xs font-semibold uppercase tracking-wider hover:bg-red-800 transition-colors rounded-md shadow-xs text-center"
                       >
                         Continuar Solicitud y Pagar →
                       </Link>
@@ -651,13 +676,13 @@ export default function RegisteredHorsesList({ horses }: RegisteredHorsesListPro
                   </>
                 ) : (
                   <>
-                    <span className="text-xs text-zinc-500">
-                      Estatus: <strong className="text-zinc-800 font-medium">{selectedHorse.status}</strong>
+                    <span className="text-xs text-zinc-500 font-sans">
+                      Estatus: <strong className="text-zinc-950 font-medium">{selectedHorse.status}</strong>
                     </span>
                     <button
                       type="button"
                       onClick={() => setSelectedHorse(null)}
-                      className="px-6 py-2.5 bg-zinc-950 text-white text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 transition-colors rounded cursor-pointer"
+                      className="px-6 py-2.5 bg-zinc-950 text-white text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 transition-colors rounded-md cursor-pointer"
                     >
                       Cerrar
                     </button>

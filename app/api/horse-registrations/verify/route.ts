@@ -94,6 +94,7 @@ export async function POST(request: Request) {
         success: true,
         registrationId,
         horseName: horseName || "Ejemplar",
+        farmPrefix: session.metadata?.farmPrefix || undefined,
         paymentStatus: "paid",
         status: "under_review",
         amountTotalMxn: (session.amount_total || 0) / 100,
@@ -102,11 +103,24 @@ export async function POST(request: Request) {
       });
     }
 
+    // Asegurar que si compró prefijo, quede guardado en memberships
+    if (session.metadata?.isPurchasingPrefix === "true" && session.metadata?.farmPrefix && session.metadata?.userId) {
+      try {
+        await supabaseAdmin
+          .from("memberships")
+          .update({ farm_prefix: session.metadata.farmPrefix })
+          .eq("id", session.metadata.userId);
+      } catch (err) {
+        console.warn("No se pudo actualizar farm_prefix desde verify:", err);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       registration: updated,
       registrationId: updated.id,
       horseName: updated.horse_name,
+      farmPrefix: updated.farm_prefix || session.metadata?.farmPrefix || undefined,
       ownerName: updated.owner_name,
       gender: updated.gender,
       birthDate: updated.birth_date,

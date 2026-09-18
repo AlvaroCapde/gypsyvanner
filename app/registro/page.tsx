@@ -158,7 +158,7 @@ export default function RegistroPage() {
                 </p>
               </div>
 
-              <p className="text-zinc-500 font-sans max-w-2xl mx-auto">Conoce por qué pre-registrar a tu caballo con la GVHS no solo asegura su linaje, sino que protege e incrementa dramáticamente su valor.</p>
+              <p className="text-zinc-500 font-sans max-w-2xl mx-auto">Conoce por qué registrar a tu caballo con la GVHS no solo asegura su linaje, sino que protege e incrementa dramáticamente su valor.</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">

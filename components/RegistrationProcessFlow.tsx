@@ -1,13 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-
-interface StepCost {
-  label: string;
-  amount: string;
-}
 
 interface Step {
   number: string;
@@ -18,8 +13,7 @@ interface Step {
   dateBadge?: string;
   highlights?: string[];
   prerequisiteNote?: string;
-  costs?: StepCost[];
-  costFootnote?: string;
+  hasCost?: boolean;
   ctaText?: string;
   ctaHref?: string;
   isExternal?: boolean;
@@ -37,6 +31,7 @@ const STEPS: Step[] = [
       "Acceso al padrón oficial de criadores",
       "Habilita el inicio de pre-registro de ejemplares",
     ],
+    hasCost: true,
     image: "/horse_material/1.jpg",
     ctaText: "Solicitar membresía",
     ctaHref: "/membresia",
@@ -52,6 +47,7 @@ const STEPS: Step[] = [
       "Cotejo de 4 fotografías reglamentarias",
       "Envío de muestras de folículo capilar",
     ],
+    hasCost: true,
     image: "/horse_material/6.jpg",
     ctaText: "Ver reglas de pre-registro",
     ctaHref: "/registro",
@@ -67,6 +63,7 @@ const STEPS: Step[] = [
       "Gestión y acompañamiento técnico",
       "Requisito reglamentario para inspección",
     ],
+    hasCost: false,
     image: "/horse_material/4.jpg",
     ctaText: "Ver proceso de pre-registro",
     ctaHref: "/registro",
@@ -80,20 +77,38 @@ const STEPS: Step[] = [
       "Una vez que te lleguen los documentos, guárdalos y mantente atento para cuando inicie la inscripción registrarte en la inspección oficial.",
     prerequisiteNote:
       "Es necesario concluir todos los pasos anteriores (membresía, pruebas de ADN, pre-registro de caballos) para que documentos y caballos estén listos para la inspección oficial del 9 de marzo de 2026, realizada por jueces oficiales de GVHS. En esta inspección se determinará si el caballo califica como Gypsy Vanner y puede entrar a los libros de registro.",
-    costs: [
-      { label: "Menores de 3 años", amount: "$2,500 MXN" },
-      { label: "Mayores de 3 años", amount: "$4,000 MXN" },
-    ],
-    costFootnote: "+ costo adicional de emitir el certificado",
+    hasCost: true,
     image: "/horse_material/5.jpg",
     ctaText: "Preparar pre-registro",
     ctaHref: "/registro",
   },
 ];
 
+type CostModalTab = "step1" | "step2" | "step4";
+
 export default function RegistrationProcessFlow() {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [showCertificateModal, setShowCertificateModal] = useState<boolean>(false);
+  const [costModalOpen, setCostModalOpen] = useState<boolean>(false);
+  const [costModalTab, setCostModalTab] = useState<CostModalTab>("step1");
+
+  // Manejo de tecla ESC para cerrar modales
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowCertificateModal(false);
+        setCostModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const openCostModal = (tab: CostModalTab = "step1", e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setCostModalTab(tab);
+    setCostModalOpen(true);
+  };
 
   const handleSelectStep = (idx: number) => {
     setActiveStep(idx);
@@ -107,12 +122,25 @@ export default function RegistrationProcessFlow() {
     <section id="proceso-registro" className="w-full bg-zinc-50 py-24 md:py-32 border-b border-zinc-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
 
-        {/* Encabezado Editorial con Muestra de Certificado al Lado */}
+        {/* Encabezado Editorial con Muestra de Certificado al Lado y Botón de Costos */}
         <div className="max-w-4xl mx-auto mb-12 md:mb-16 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
           <div className="text-center md:text-left flex-1">
-            <p className="font-sans text-xs uppercase tracking-[0.25em] text-red-700 font-semibold mb-3">
-              Flujo de Pre-Registro
-            </p>
+            <div className="flex items-center justify-center md:justify-start gap-2.5 mb-3 flex-wrap">
+              <p className="font-sans text-xs uppercase tracking-[0.25em] text-red-700 font-semibold">
+                Flujo de Pre-Registro
+              </p>
+              <span className="text-zinc-300 hidden sm:inline">•</span>
+              <button
+                type="button"
+                onClick={(e) => openCostModal("step1", e)}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-950 bg-white border border-zinc-200 hover:border-zinc-400 px-3 py-1 rounded-full shadow-2xs transition-colors cursor-pointer"
+              >
+                <span>Ver costos aproximados</span>
+                <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-zinc-950 leading-tight">
               Sé parte de los caballos <span className="text-red-700">fundadores</span>, comienza el pre-registro.
             </h2>
@@ -157,16 +185,18 @@ export default function RegistrationProcessFlow() {
               key={step.number}
               type="button"
               onClick={() => handleSelectStep(idx)}
-              className={`pb-4 text-center font-sans text-xs uppercase tracking-wider font-semibold transition-all relative flex items-center justify-center gap-2 ${activeStep === idx
-                ? "text-zinc-950"
-                : "text-zinc-400 hover:text-zinc-700"
-                }`}
+              className={`pb-4 text-center font-sans text-xs uppercase tracking-wider font-semibold transition-all relative flex items-center justify-center gap-2 cursor-pointer ${
+                activeStep === idx
+                  ? "text-zinc-950"
+                  : "text-zinc-400 hover:text-zinc-700"
+              }`}
             >
               <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${activeStep === idx
-                  ? "bg-red-700 text-white"
-                  : "bg-zinc-200 text-zinc-600"
-                  }`}
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
+                  activeStep === idx
+                    ? "bg-red-700 text-white"
+                    : "bg-zinc-200 text-zinc-600"
+                }`}
               >
                 {idx + 1}
               </span>
@@ -182,16 +212,20 @@ export default function RegistrationProcessFlow() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {STEPS.map((step, index) => {
             const isActive = activeStep === index;
+            const stepTabKey: CostModalTab =
+              index === 0 ? "step1" : index === 1 ? "step2" : "step4";
+
             return (
               <div
                 key={step.number}
                 id={`flujo-paso-${step.number}`}
                 onMouseEnter={() => setActiveStep(index)}
                 onClick={() => setActiveStep(index)}
-                className={`group relative bg-white border transition-all duration-500 overflow-hidden cursor-pointer flex flex-col rounded-sm ${isActive
-                  ? "border-zinc-950 shadow-xl -translate-y-2 ring-1 ring-zinc-950/10"
-                  : "border-zinc-200 hover:border-zinc-400 shadow-sm"
-                  }`}
+                className={`group relative bg-white border transition-all duration-500 overflow-hidden cursor-pointer flex flex-col rounded-sm ${
+                  isActive
+                    ? "border-zinc-950 shadow-xl -translate-y-2 ring-1 ring-zinc-950/10"
+                    : "border-zinc-200 hover:border-zinc-400 shadow-sm"
+                }`}
               >
                 {/* Imagen del Caballo */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-100">
@@ -200,8 +234,9 @@ export default function RegistrationProcessFlow() {
                     alt={step.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className={`object-cover object-center transition-all duration-700 ease-out ${isActive ? "scale-105 saturate-100" : "saturate-[0.85] group-hover:scale-105 group-hover:saturate-100"
-                      }`}
+                    className={`object-cover object-center transition-all duration-700 ease-out ${
+                      isActive ? "scale-105 saturate-100" : "saturate-[0.85] group-hover:scale-105 group-hover:saturate-100"
+                    }`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70" />
                   <span className="absolute top-4 left-4 font-serif text-2xl font-medium text-white drop-shadow-md">
@@ -217,9 +252,10 @@ export default function RegistrationProcessFlow() {
                 {/* Contenido Editorial */}
                 <div className="p-6 flex flex-col flex-grow justify-between bg-white">
                   <div className="space-y-3">
-                    <span className="text-[11px] font-sans uppercase tracking-widest text-red-700 font-semibold mb-1 block">
+                    <span className="text-[11px] font-sans uppercase tracking-widest text-red-700 font-semibold block">
                       {step.tag}
                     </span>
+
                     <h3 className="font-serif text-xl sm:text-2xl text-zinc-950 leading-snug">
                       {step.title}
                     </h3>
@@ -227,7 +263,7 @@ export default function RegistrationProcessFlow() {
                       {step.description}
                     </p>
 
-                    {/* Highlights / Puntos clave (Pasos 1 a 3) */}
+                    {/* Highlights / Puntos clave */}
                     {step.highlights && step.highlights.length > 0 && (
                       <ul className="space-y-1.5 pt-2 border-t border-zinc-100">
                         {step.highlights.map((item, i) => (
@@ -254,32 +290,28 @@ export default function RegistrationProcessFlow() {
                       </div>
                     )}
 
-                    {/* Costos de Inspección (Paso 4) */}
-                    {step.costs && step.costs.length > 0 && (
-                      <div className="pt-3 border-t border-zinc-100">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-900 mb-2">
-                          Costos de inspección:
-                        </p>
-                        <div className="bg-zinc-50 p-2.5 rounded border border-zinc-200/80 space-y-1.5 text-xs">
-                          {step.costs.map((cost) => (
-                            <div key={cost.label} className="flex justify-between items-center text-zinc-700">
-                              <span className="font-light">{cost.label}:</span>
-                              <span className="font-semibold text-zinc-950">{cost.amount}</span>
-                            </div>
-                          ))}
-                          {step.costFootnote && (
-                            <p className="text-[10px] text-zinc-500 pt-1.5 border-t border-zinc-200/60 italic">
-                              {step.costFootnote}
-                            </p>
-                          )}
-                        </div>
+                    {/* Botón Simple de Ver Desglose de Costos (Pasos 1, 2 y 4) */}
+                    {step.hasCost && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={(e) => openCostModal(stepTabKey, e)}
+                          className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-950 font-medium transition-colors cursor-pointer py-1 group/cost"
+                        >
+                          <svg className="w-3.5 h-3.5 text-zinc-400 group-hover/cost:text-red-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="underline decoration-zinc-300 underline-offset-2 group-hover/cost:decoration-zinc-950">
+                            Ver costos de este paso
+                          </span>
+                        </button>
                       </div>
                     )}
                   </div>
 
-                  {/* Enlace */}
+                  {/* Enlace CTA */}
                   {step.ctaText && step.ctaHref && (
-                    <div className="pt-5 mt-5 border-t border-zinc-100">
+                    <div className="pt-4 mt-4 border-t border-zinc-100">
                       {step.isExternal ? (
                         <a
                           href={step.ctaHref}
@@ -305,10 +337,11 @@ export default function RegistrationProcessFlow() {
                       ) : (
                         <Link
                           href={step.ctaHref}
-                          className={`inline-flex items-center gap-2 text-xs font-sans uppercase tracking-wider font-semibold transition-colors ${isActive
-                            ? "text-red-700 hover:text-red-800"
-                            : "text-zinc-900 group-hover:text-red-700"
-                            }`}
+                          className={`inline-flex items-center gap-2 text-xs font-sans uppercase tracking-wider font-semibold transition-colors ${
+                            isActive
+                              ? "text-red-700 hover:text-red-800"
+                              : "text-zinc-900 group-hover:text-red-700"
+                          }`}
                         >
                           {step.ctaText}
                           <svg
@@ -361,17 +394,196 @@ export default function RegistrationProcessFlow() {
               >
                 Comenzar Paso 1
               </Link>
-              <Link
-                href="/registro"
-                className="inline-flex items-center justify-center px-6 py-3 border border-zinc-300 text-zinc-800 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 transition-colors text-center"
+              <button
+                type="button"
+                onClick={(e) => openCostModal("step1", e)}
+                className="inline-flex items-center justify-center px-6 py-3 border border-zinc-300 text-zinc-800 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 transition-colors text-center cursor-pointer"
               >
-                Guía de Pre-Registro
-              </Link>
+                Ver Costos
+              </button>
             </div>
           </div>
         </div>
 
       </div>
+
+      {/* Modal Simple y Conciso de Desglose de Costos */}
+      {costModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setCostModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="relative max-w-xl w-full bg-white rounded-lg border border-zinc-200 shadow-xl overflow-hidden my-auto cursor-default flex flex-col max-h-[85vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-5 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
+              <div>
+                <span className="text-[10px] font-sans uppercase tracking-wider text-red-700 font-bold block">
+                  Tarifas Oficiales GVHS
+                </span>
+                <h3 className="font-serif text-lg font-bold text-zinc-950">
+                  Costos Aproximados del Proceso
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCostModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-zinc-200 hover:bg-zinc-300 text-zinc-600 flex items-center justify-center text-xs transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Pestañas de Pasos */}
+            <div className="grid grid-cols-3 border-b border-zinc-200 bg-white text-xs font-sans font-medium px-4 pt-2 gap-2 text-center">
+              <button
+                type="button"
+                onClick={() => setCostModalTab("step1")}
+                className={`pb-2 px-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                  costModalTab === "step1"
+                    ? "border-red-700 text-red-700 font-semibold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                1. Membresía
+              </button>
+              <button
+                type="button"
+                onClick={() => setCostModalTab("step2")}
+                className={`pb-2 px-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                  costModalTab === "step2"
+                    ? "border-red-700 text-red-700 font-semibold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                2. ADN y Registro
+              </button>
+              <button
+                type="button"
+                onClick={() => setCostModalTab("step4")}
+                className={`pb-2 px-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                  costModalTab === "step4"
+                    ? "border-red-700 text-red-700 font-semibold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                4. Inspección GVHS
+              </button>
+            </div>
+
+            {/* Contenido Simple y Limpio */}
+            <div className="p-5 overflow-y-auto space-y-4 text-xs font-sans text-zinc-700">
+              
+              {/* PASO 1 */}
+              {costModalTab === "step1" && (
+                <div className="p-4 rounded border border-zinc-200 bg-zinc-50/70 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 block">Paso 1</span>
+                      <h4 className="font-serif text-sm font-bold text-zinc-950">Membresía Anual</h4>
+                    </div>
+                    <span className="font-semibold text-zinc-950 text-sm">$900 MXN</span>
+                  </div>
+                  <p className="text-zinc-600 font-light leading-relaxed">
+                    Cuota anual obligatoria de criador/asociado. Habilita el pre-registro ilimitado de caballos y acceso al padrón oficial.
+                  </p>
+                </div>
+              )}
+
+              {/* PASO 2 */}
+              {costModalTab === "step2" && (
+                <div className="p-4 rounded border border-zinc-200 bg-zinc-50/70 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 block">Paso 2</span>
+                      <h4 className="font-serif text-sm font-bold text-zinc-950">Pruebas de ADN y Pre-Registro</h4>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 bg-white p-3 rounded border border-zinc-200/80">
+                    <span className="font-semibold text-zinc-900 block text-[11px]">1. Pruebas Genéticas Obligatorias:</span>
+                    <div className="flex justify-between text-zinc-600 pl-2">
+                      <span>• Panel de salud PSSM1 y FIS:</span>
+                      <span className="font-medium text-zinc-900">$3,240 MXN</span>
+                    </div>
+                    <div className="flex justify-between text-zinc-600 pl-2">
+                      <span>• Marcadores de ADN y paternidad:</span>
+                      <span className="font-medium text-zinc-900">$1,440 MXN</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 bg-white p-3 rounded border border-zinc-200/80">
+                    <span className="font-semibold text-zinc-900 block text-[11px]">2. Tarifa Base por Edad:</span>
+                    <div className="flex justify-between text-zinc-600 pl-2">
+                      <span>• 0 a 6 meses:</span>
+                      <span className="font-medium text-zinc-900">$1,350 MXN</span>
+                    </div>
+                    <div className="flex justify-between text-zinc-600 pl-2">
+                      <span>• 6 meses a &lt;3 años:</span>
+                      <span className="font-medium text-zinc-900">$1,800 MXN</span>
+                    </div>
+                    <div className="flex justify-between text-zinc-600 pl-2">
+                      <span>• 3 años en adelante:</span>
+                      <span className="font-medium text-zinc-900">$2,250 MXN</span>
+                    </div>
+                    <div className="flex justify-between text-zinc-600 pl-2">
+                      <span>• Hardship (≤2017 sin papeles):</span>
+                      <span className="font-medium text-zinc-900">$4,500 MXN</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-zinc-500 italic pl-1">
+                    * Pruebas de color opcionales: $450 MXN c/u.
+                  </p>
+                </div>
+              )}
+
+              {/* PASO 4 */}
+              {costModalTab === "step4" && (
+                <div className="p-4 rounded border border-zinc-200 bg-zinc-50/70 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 block">Paso 4</span>
+                      <h4 className="font-serif text-sm font-bold text-zinc-950">Inspección Oficial GVHS (9 Mar 2026)</h4>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 bg-white p-3 rounded border border-zinc-200/80">
+                    <div className="flex justify-between text-zinc-700">
+                      <span>Menores de 3 años:</span>
+                      <span className="font-bold text-zinc-950">$2,500 MXN</span>
+                    </div>
+                    <div className="flex justify-between text-zinc-700">
+                      <span>Mayores de 3 años:</span>
+                      <span className="font-bold text-zinc-950">$4,000 MXN</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-zinc-500 italic">
+                    + Costo administrativo de emisión del certificado al calificar.
+                  </p>
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 bg-zinc-100 border-t border-zinc-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setCostModalOpen(false)}
+                className="px-4 py-1.5 bg-zinc-900 text-white text-xs font-medium rounded hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Vista Completa del Certificado de Ejemplo */}
       {showCertificateModal && (
@@ -423,3 +635,5 @@ export default function RegistrationProcessFlow() {
     </section>
   );
 }
+
+

@@ -20,13 +20,18 @@ export default function Hero() {
 
       {/* Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-zinc-950/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="text-white font-serif text-xl tracking-wide font-medium">
-            GVHS México
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-white font-serif text-xl tracking-wide font-medium hover:text-zinc-200 transition-colors">
+              GVHS
+            </Link>
+            <span className="hidden sm:inline-block text-xs text-zinc-400 border-l border-zinc-700/80 pl-4 font-sans tracking-wide">
+              El Registro Oficial del Caballo Gypsy Vanner en México
+            </span>
           </div>
           <Link
             href="/login"
-            className="text-zinc-200 text-sm font-sans tracking-wide hover:text-white transition-colors"
+            className="text-zinc-200 text-sm font-sans tracking-wide hover:text-white transition-colors shrink-0"
           >
             Iniciar Sesión
           </Link>

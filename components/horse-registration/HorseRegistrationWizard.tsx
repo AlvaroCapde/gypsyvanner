@@ -7,6 +7,8 @@ import {
   calculateHorseFee,
   DNA_FEE_MXN,
   PSSM_FIS_FEE_MXN,
+  PREFIX_FEE_USD,
+  PREFIX_FEE_MXN,
   COLOR_TESTS_CATALOG,
   COMMON_COAT_COLORS,
   COMMON_COAT_PATTERNS,
@@ -22,11 +24,15 @@ import ColorTestingStep from "./ColorTestingStep";
 interface HorseRegistrationWizardProps {
   initialOwnerName: string;
   userEmail: string;
+  initialFarmPrefix?: string;
+  farmName?: string;
 }
 
 export default function HorseRegistrationWizard({
   initialOwnerName,
   userEmail,
+  initialFarmPrefix = "",
+  farmName = "",
 }: HorseRegistrationWizardProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -43,6 +49,9 @@ export default function HorseRegistrationWizard({
 
   // Form State
   const [formData, setFormData] = useState<Partial<HorseRegistrationFormData>>({
+    hasExistingPrefix: Boolean(initialFarmPrefix),
+    wantsToPurchasePrefix: false,
+    farmPrefix: initialFarmPrefix || "",
     horseName: "",
     ownerName: initialOwnerName || "",
     acquisitionDate: "",
@@ -89,6 +98,11 @@ export default function HorseRegistrationWizard({
           setFormData((prev) => ({
             ...prev,
             ...parsed.formData,
+            hasExistingPrefix: Boolean(initialFarmPrefix),
+            farmPrefix: initialFarmPrefix || parsed.formData.farmPrefix || "",
+            wantsToPurchasePrefix: !initialFarmPrefix
+              ? Boolean(parsed.formData.wantsToPurchasePrefix)
+              : false,
             selectedColorTests: Array.isArray(parsed.formData.selectedColorTests)
               ? parsed.formData.selectedColorTests
               : [],
@@ -123,6 +137,11 @@ export default function HorseRegistrationWizard({
             setFormData((prev) => ({
               ...prev,
               ...data.draft,
+              hasExistingPrefix: Boolean(initialFarmPrefix),
+              farmPrefix: initialFarmPrefix || data.draft.farmPrefix || "",
+              wantsToPurchasePrefix: !initialFarmPrefix
+                ? Boolean(data.draft.wantsToPurchasePrefix)
+                : false,
               selectedColorTests: Array.isArray(data.draft.selectedColorTests)
                 ? data.draft.selectedColorTests
                 : [],
@@ -144,7 +163,7 @@ export default function HorseRegistrationWizard({
           setIsLoadingDraft(false);
         });
     }
-  }, [isCanceled, draftIdParam, storageKey, initialOwnerName]);
+  }, [isCanceled, draftIdParam, storageKey, initialOwnerName, initialFarmPrefix]);
 
   // Guardar automáticamente en LocalStorage cuando cambien los datos o el paso
   useEffect(() => {
@@ -191,6 +210,9 @@ export default function HorseRegistrationWizard({
       setDraftId(null);
       setHasRestoredDraft(false);
       setFormData({
+        hasExistingPrefix: Boolean(initialFarmPrefix),
+        wantsToPurchasePrefix: false,
+        farmPrefix: initialFarmPrefix || "",
         horseName: "",
         ownerName: initialOwnerName || "",
         acquisitionDate: "",
@@ -218,10 +240,22 @@ export default function HorseRegistrationWizard({
     }
   };
 
-  // Real-time Fee calculation (incluye pruebas de color)
+  // Real-time Fee calculation (incluye pruebas de color y prefijo opcional)
   const feeBreakdown = useMemo(() => {
-    return calculateHorseFee(formData.birthDate || "", formData.selectedColorTests || []);
-  }, [formData.birthDate, formData.selectedColorTests]);
+    const isPurchasing = !Boolean(initialFarmPrefix) && Boolean(formData.wantsToPurchasePrefix);
+    return calculateHorseFee(
+      formData.birthDate || "",
+      formData.selectedColorTests || [],
+      isPurchasing,
+      formData.farmPrefix || initialFarmPrefix || ""
+    );
+  }, [
+    formData.birthDate,
+    formData.selectedColorTests,
+    formData.wantsToPurchasePrefix,
+    formData.farmPrefix,
+    initialFarmPrefix,
+  ]);
 
   // Handle generic input changes
   const handleInputChange = (
@@ -244,6 +278,14 @@ export default function HorseRegistrationWizard({
     const newErrors: Record<string, string> = {};
 
     if (step === 1) {
+      if (formData.wantsToPurchasePrefix && !initialFarmPrefix) {
+        const cleanPrefix = formData.farmPrefix?.trim() || "";
+        if (cleanPrefix.length < 2) {
+          newErrors.farmPrefix = "El prefijo oficial debe contener al menos 2 caracteres.";
+        } else if (cleanPrefix.length > 30) {
+          newErrors.farmPrefix = "El prefijo no debe superar los 30 caracteres.";
+        }
+      }
       if (!formData.horseName?.trim()) {
         newErrors.horseName = "El nombre solicitado del caballo es requerido.";
       }
@@ -506,17 +548,18 @@ export default function HorseRegistrationWizard({
                 if (item.step < currentStep) setCurrentStep(item.step);
               }}
               disabled={item.step > currentStep}
-              className={`text-left p-3.5 border transition-all ${currentStep === item.step
-                ? "bg-zinc-950 text-white border-zinc-950 shadow-sm"
-                : currentStep > item.step
-                  ? "bg-zinc-100 text-zinc-900 border-zinc-300 hover:bg-zinc-200 cursor-pointer"
-                  : "bg-white text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
-                }`}
+              className={`text-left p-4 border rounded-md transition-all ${
+                currentStep === item.step
+                  ? "bg-zinc-950 text-white border-zinc-950 shadow-sm"
+                  : currentStep > item.step
+                  ? "bg-zinc-100 text-zinc-900 border-zinc-200 hover:bg-zinc-200/80 cursor-pointer"
+                  : "bg-white text-zinc-400 border-zinc-200 cursor-not-allowed opacity-50"
+              }`}
             >
-              <span className="text-[11px] font-mono tracking-wider uppercase block opacity-80">
+              <span className="text-[10px] font-mono tracking-wider uppercase block opacity-80">
                 Paso {item.step} {item.optional ? "• Opcional" : ""}
               </span>
-              <span className="font-serif text-sm font-medium truncate block">
+              <span className="font-serif text-sm font-medium truncate block mt-0.5">
                 {item.title.split(". ")[1]}
               </span>
             </button>
@@ -525,48 +568,52 @@ export default function HorseRegistrationWizard({
       </div>
 
       {isCanceled && (
-        <div className="mb-8 p-4 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <svg className="w-5 h-5 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+        <div className="mb-8 p-5 bg-zinc-50 text-zinc-900 border border-zinc-200 rounded-xl text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-red-700 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
             <div>
-              <p className="font-semibold text-amber-950">El proceso de pago fue cancelado.</p>
-              <p className="text-amber-800">Tus datos continúan listos para reintentar cuando gustes.</p>
+              <p className="font-serif font-semibold text-sm text-zinc-950">El proceso de pago fue cancelado</p>
+              <p className="text-zinc-600 font-sans mt-0.5">Los datos ingresados siguen guardados para que puedas reintentar cuando gustes.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleDiscardDraft}
-            className="text-[11px] font-semibold uppercase tracking-wider text-amber-900 hover:text-red-700 bg-amber-100 hover:bg-amber-200/80 px-3.5 py-2 rounded transition-colors self-start sm:self-auto cursor-pointer flex-shrink-0"
+            className="text-[11px] font-semibold uppercase tracking-wider text-zinc-700 hover:text-red-700 bg-white hover:bg-zinc-100 border border-zinc-300 px-4 py-2 rounded-md transition-colors self-start sm:self-auto cursor-pointer flex-shrink-0"
           >
-            Descartar borrador y empezar de nuevo
+            Descartar borrador
           </button>
         </div>
       )}
 
       {isLoadingDraft && (
-        <div className="mb-6 p-3.5 bg-zinc-100 text-zinc-700 border border-zinc-200 rounded-md text-xs flex items-center gap-2.5">
-          <div className="w-3.5 h-3.5 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+        <div className="mb-6 p-4 bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-xl text-xs flex items-center gap-3 shadow-xs">
+          <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin flex-shrink-0" />
           <span>Restaurando los datos guardados de tu solicitud de pre-registro...</span>
         </div>
       )}
 
       {!isCanceled && draftIdParam && (
-        <div className="mb-8 p-4 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <svg className="w-5 h-5 text-blue-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="mb-8 p-5 bg-zinc-50 text-zinc-900 border border-zinc-200 rounded-xl text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-zinc-950 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
             <div>
-              <p className="font-semibold text-blue-950">Continuando solicitud de pre-registro: {formData.horseName || "Ejemplar"}</p>
-              <p className="text-blue-800">Tus datos y fotografías reglamentarias han sido recuperados. Puedes revisar los detalles y proceder al pago.</p>
+              <p className="font-serif font-semibold text-sm text-zinc-950">Continuando solicitud: {formData.horseName || "Ejemplar"}</p>
+              <p className="text-zinc-600 font-sans mt-0.5">Tus datos y fotografías reglamentarias han sido recuperados con éxito.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleDiscardDraft}
-            className="text-[11px] font-semibold uppercase tracking-wider text-blue-900 hover:text-red-700 bg-blue-100 hover:bg-blue-200/80 px-3.5 py-2 rounded transition-colors self-start sm:self-auto cursor-pointer flex-shrink-0"
+            className="text-[11px] font-semibold uppercase tracking-wider text-zinc-700 hover:text-red-700 bg-white hover:bg-zinc-100 border border-zinc-300 px-4 py-2 rounded-md transition-colors self-start sm:self-auto cursor-pointer flex-shrink-0"
           >
             Descartar borrador
           </button>
@@ -574,10 +621,13 @@ export default function HorseRegistrationWizard({
       )}
 
       {!isCanceled && !draftIdParam && hasRestoredDraft && formData.horseName && (
-        <div className="mb-6 p-3.5 bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-lg text-xs flex items-center justify-between">
-          <span>
-            Borrador guardado recuperado: <strong>{formData.horseName}</strong>.
-          </span>
+        <div className="mb-6 p-4 bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-xl text-xs flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
+            <span>
+              Borrador recuperado: <strong className="text-zinc-950">{formData.horseName}</strong>.
+            </span>
+          </div>
           <button
             type="button"
             onClick={handleDiscardDraft}
@@ -589,16 +639,16 @@ export default function HorseRegistrationWizard({
       )}
 
       {submitError && (
-        <div className="mb-8 p-4 bg-red-50 text-red-800 border border-red-200 rounded-md text-sm flex items-center justify-between">
+        <div className="mb-8 p-4 bg-red-50 text-red-900 border border-red-200 rounded-xl text-xs sm:text-sm flex items-center justify-between shadow-xs">
           <span>{submitError}</span>
-          <button type="button" onClick={() => setSubmitError("")} className="text-red-700 font-bold ml-4">
+          <button type="button" onClick={() => setSubmitError("")} className="text-red-700 font-bold ml-4 hover:text-red-900">
             ✕
           </button>
         </div>
       )}
 
       {/* Form Container */}
-      <div className="w-full bg-white border border-zinc-200 p-6 sm:p-10 shadow-sm">
+      <div className="w-full bg-white border border-zinc-200 rounded-xl p-6 sm:p-10 shadow-xs">
         <form onSubmit={(e) => e.preventDefault()}>
           {/* PASO 1: IDENTIDAD Y LINAJE */}
           {currentStep === 1 && (
@@ -616,9 +666,210 @@ export default function HorseRegistrationWizard({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* SECCIÓN PREFIJO DE CRIADERO / RANCHO (DESIGN SYSTEM: 90-8-2 / EDITORIAL EQUESTRIAN) */}
+                <div className="md:col-span-2">
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6 sm:p-7 space-y-5 shadow-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-base font-serif font-semibold text-zinc-950">
+                            Prefijo Oficial de Criadero / Rancho
+                          </h3>
+                          <p className="text-xs text-zinc-500 font-sans mt-0.5">
+                            Identifica y protege la estirpe de los ejemplares criados por tu rancho ante la GVHS México
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        href="/registro/documentos/reglas"
+                        target="_blank"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-red-700 transition-colors uppercase tracking-wider self-start sm:self-auto"
+                      >
+                        <span>Reglamento GVHS</span>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </Link>
+                    </div>
+
+                    {/* Caso 1: El socio YA tiene prefijo registrado en la BD */}
+                    {initialFarmPrefix ? (
+                      <div className="bg-white border border-zinc-200 rounded-lg p-5 border-l-4 border-zinc-950 shadow-xs space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider bg-zinc-100 text-zinc-900 border border-zinc-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
+                            Registrado & Activo
+                          </span>
+                          <span className="text-xs text-zinc-500 font-sans">
+                            Asignado a <strong className="text-zinc-900">{farmName || "tu Criadero"}</strong>
+                          </span>
+                        </div>
+                        <div className="text-2xl font-serif font-bold text-zinc-950 tracking-wide">
+                          {initialFarmPrefix}
+                        </div>
+                        <p className="text-xs text-zinc-600 font-sans leading-relaxed">
+                          Este prefijo oficial está protegido y registrado a tu nombre. Se antepondrá automáticamente en el certificado oficial de registro de este ejemplar sin costo adicional.
+                        </p>
+                      </div>
+                    ) : (
+                      /* Caso 2: El socio NO tiene prefijo todavía -> Bento cards interactivas */
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {/* Opción A: Comprar prefijo */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleInputChange("wantsToPurchasePrefix", true);
+                            }}
+                            className={`p-5 border rounded-lg text-left transition-all cursor-pointer flex flex-col justify-between ${
+                              formData.wantsToPurchasePrefix
+                                ? "border-zinc-950 bg-white ring-1 ring-zinc-950 shadow-sm"
+                                : "border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-xs"
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-serif text-sm font-semibold text-zinc-950">
+                                  Comprar Prefijo Oficial
+                                </span>
+                                <span className="text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200/80 px-2.5 py-0.5 rounded tracking-wide">
+                                  +${formatCurrencyMxn(PREFIX_FEE_MXN)}
+                                </span>
+                              </div>
+                              <p className="text-xs text-zinc-600 leading-relaxed font-sans">
+                                Protege tu marca de criadero ante la GVHS de por vida. Se aplicará a todos los potros nacidos en tu rancho.
+                              </p>
+                            </div>
+                            <div className="mt-4 flex items-center gap-2.5 text-xs font-medium text-zinc-900">
+                              <div
+                                className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                                  formData.wantsToPurchasePrefix ? "border-zinc-950 bg-zinc-950" : "border-zinc-300"
+                                }`}
+                              >
+                                {formData.wantsToPurchasePrefix && (
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                )}
+                              </div>
+                              <span className="font-sans">Deseo registrar un prefijo</span>
+                            </div>
+                          </button>
+
+                          {/* Opción B: Continuar sin prefijo */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleInputChange("wantsToPurchasePrefix", false);
+                              handleInputChange("farmPrefix", "");
+                            }}
+                            className={`p-5 border rounded-lg text-left transition-all cursor-pointer flex flex-col justify-between ${
+                              !formData.wantsToPurchasePrefix
+                                ? "border-zinc-950 bg-white ring-1 ring-zinc-950 shadow-sm"
+                                : "border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-xs"
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-serif text-sm font-semibold text-zinc-950">
+                                  Continuar sin Prefijo
+                                </span>
+                                <span className="text-[11px] font-medium text-zinc-500 bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 rounded">
+                                  $0 MXN
+                                </span>
+                              </div>
+                              <p className="text-xs text-zinc-600 leading-relaxed font-sans">
+                                Registrar el ejemplar únicamente con su nombre solicitado simple, sin prefijo de criadero.
+                              </p>
+                            </div>
+                            <div className="mt-4 flex items-center gap-2.5 text-xs font-medium text-zinc-900">
+                              <div
+                                className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                                  !formData.wantsToPurchasePrefix ? "border-zinc-950 bg-zinc-950" : "border-zinc-300"
+                                }`}
+                              >
+                                {!formData.wantsToPurchasePrefix && (
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                )}
+                              </div>
+                              <span className="font-sans">Registrar sin prefijo</span>
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Input condicional cuando selecciona comprar prefijo */}
+                        {formData.wantsToPurchasePrefix && (
+                          <div className="bg-white border border-zinc-200 rounded-lg p-5 space-y-3 shadow-xs">
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700">
+                              Nombre o Siglas del Prefijo Deseado *
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={formData.farmPrefix || ""}
+                                onChange={(e) => {
+                                  const upper = e.target.value.toUpperCase();
+                                  handleInputChange("farmPrefix", upper);
+                                }}
+                                maxLength={30}
+                                placeholder="EJ. RANCHO SAN JOSE O RSJ"
+                                className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm font-mono text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 uppercase tracking-wider"
+                              />
+                              <span className="absolute right-3.5 top-3.5 text-[11px] font-mono text-zinc-400">
+                                {(formData.farmPrefix || "").length}/30
+                              </span>
+                            </div>
+                            {errors.farmPrefix && (
+                              <p className="text-xs text-red-700 font-medium">{errors.farmPrefix}</p>
+                            )}
+                            <p className="text-xs text-zinc-500 font-sans leading-relaxed">
+                              Mínimo 2 caracteres. No se permiten palabras reservadas como &quot;Gypsy&quot; o &quot;Vanner&quot; solas. Sujeto a aprobación oficial del registrador GVHS.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Vista previa simplificada y clara del nombre oficial */}
+                    {(() => {
+                      const activePrefix = initialFarmPrefix || (formData.wantsToPurchasePrefix ? formData.farmPrefix?.trim() : "");
+                      const horseNameText = formData.horseName?.trim() || "";
+                      const combinedName = activePrefix ? `${activePrefix} ${horseNameText}` : horseNameText;
+
+                      return (
+                        <div className="bg-white border border-zinc-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                          <div>
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block mb-0.5">
+                              Vista previa del nombre oficial
+                            </span>
+                            <div className="font-serif text-lg text-zinc-950">
+                              {activePrefix ? (
+                                <>
+                                  <span className="font-bold text-red-700 mr-1.5">{activePrefix}</span>
+                                  <span>{horseNameText || <span className="text-zinc-400 italic">Nombre del caballo</span>}</span>
+                                </>
+                              ) : (
+                                <span>{horseNameText || <span className="text-zinc-400 italic">Nombre del caballo</span>}</span>
+                              )}
+                            </div>
+                          </div>
+                          {combinedName && (
+                            <span className={`text-[11px] font-mono self-start sm:self-auto ${combinedName.length > 40 ? "text-red-700 font-semibold" : "text-zinc-400"}`}>
+                              {combinedName.length}/40 caracteres
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
                 {/* Requested Horse Name */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                     Nombre Solicitado para el Caballo *
                   </label>
                   <input
@@ -626,16 +877,16 @@ export default function HorseRegistrationWizard({
                     value={formData.horseName || ""}
                     onChange={(e) => handleInputChange("horseName", e.target.value)}
                     placeholder="Ej. Royal Sovereign of GVHS"
-                    className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                    className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                   />
                   {errors.horseName && (
-                    <p className="text-xs text-red-600 mt-1.5">{errors.horseName}</p>
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.horseName}</p>
                   )}
                 </div>
 
                 {/* Name of Owner(s) */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                     Nombre del Propietario(s) *
                   </label>
                   <input
@@ -643,27 +894,28 @@ export default function HorseRegistrationWizard({
                     value={formData.ownerName || ""}
                     onChange={(e) => handleInputChange("ownerName", e.target.value)}
                     placeholder="Nombre del propietario o copropietarios"
-                    className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                    className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                   />
                   <p className="text-xs text-zinc-500 mt-1">
                     Prellenado con el nombre de tu cuenta de socio. Puedes editarlo si está en copropiedad.
                   </p>
                   {errors.ownerName && (
-                    <p className="text-xs text-red-600 mt-1.5">{errors.ownerName}</p>
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.ownerName}</p>
                   )}
                 </div>
 
                 {/* Gender Radio Cards */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-zinc-800 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-2">
                     Género del Ejemplar *
                   </label>
                   <div className="grid grid-cols-2 gap-4">
                     <label
-                      className={`border p-4 flex items-center gap-3 cursor-pointer transition-all ${formData.gender === "stallion"
-                        ? "border-zinc-950 bg-zinc-900 text-white shadow-sm"
-                        : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 text-zinc-800"
-                        }`}
+                      className={`border rounded-lg p-4 flex items-center gap-3 cursor-pointer transition-all ${
+                        formData.gender === "stallion"
+                          ? "border-zinc-950 bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950"
+                          : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-900 shadow-2xs"
+                      }`}
                     >
                       <input
                         type="radio"
@@ -674,10 +926,11 @@ export default function HorseRegistrationWizard({
                         className="sr-only"
                       />
                       <div
-                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.gender === "stallion"
-                          ? "border-white"
-                          : "border-zinc-400"
-                          }`}
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          formData.gender === "stallion"
+                            ? "border-white"
+                            : "border-zinc-400"
+                        }`}
                       >
                         {formData.gender === "stallion" && (
                           <div className="w-2 h-2 rounded-full bg-white" />
@@ -687,15 +940,15 @@ export default function HorseRegistrationWizard({
                         <span className="block text-sm font-serif font-semibold">
                           Semental
                         </span>
-
                       </div>
                     </label>
 
                     <label
-                      className={`border p-4 flex items-center gap-3 cursor-pointer transition-all ${formData.gender === "mare"
-                        ? "border-zinc-950 bg-zinc-900 text-white shadow-sm"
-                        : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 text-zinc-800"
-                        }`}
+                      className={`border rounded-lg p-4 flex items-center gap-3 cursor-pointer transition-all ${
+                        formData.gender === "mare"
+                          ? "border-zinc-950 bg-zinc-950 text-white shadow-sm ring-1 ring-zinc-950"
+                          : "border-zinc-200 bg-white hover:border-zinc-300 text-zinc-900 shadow-2xs"
+                      }`}
                     >
                       <input
                         type="radio"
@@ -706,10 +959,11 @@ export default function HorseRegistrationWizard({
                         className="sr-only"
                       />
                       <div
-                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.gender === "mare"
-                          ? "border-white"
-                          : "border-zinc-400"
-                          }`}
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          formData.gender === "mare"
+                            ? "border-white"
+                            : "border-zinc-400"
+                        }`}
                       >
                         {formData.gender === "mare" && (
                           <div className="w-2 h-2 rounded-full bg-white" />
@@ -723,13 +977,13 @@ export default function HorseRegistrationWizard({
                     </label>
                   </div>
                   {errors.gender && (
-                    <p className="text-xs text-red-600 mt-1.5">{errors.gender}</p>
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.gender}</p>
                   )}
                 </div>
 
                 {/* Date of Birth */}
                 <div>
-                  <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                     Fecha de Nacimiento *
                   </label>
                   <input
@@ -737,25 +991,25 @@ export default function HorseRegistrationWizard({
                     max={new Date().toISOString().split("T")[0]}
                     value={formData.birthDate || ""}
                     onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                    className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                   />
                   <p className="text-xs text-zinc-500 mt-1">
-                    Determina la tarifa base automáticamente.
+                    Determina la tarifa base oficial.
                   </p>
                   {formData.birthDate && (
-                    <div className="mt-2 inline-flex items-center gap-1.5 bg-zinc-100 border border-zinc-200 px-2.5 py-1 rounded text-xs text-zinc-700">
+                    <div className="mt-2 inline-flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-md text-xs text-zinc-700 font-sans">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
-                      <span>Edad estimada: <strong>{feeBreakdown.ageFormatted}</strong></span>
+                      <span>Edad estimada: <strong className="text-zinc-950">{feeBreakdown.ageFormatted}</strong></span>
                     </div>
                   )}
                   {errors.birthDate && (
-                    <p className="text-xs text-red-600 mt-1.5">{errors.birthDate}</p>
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.birthDate}</p>
                   )}
                 </div>
 
                 {/* Date acquired */}
                 <div>
-                  <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                     Fecha de Adquisición *
                   </label>
                   <input
@@ -763,25 +1017,25 @@ export default function HorseRegistrationWizard({
                     max={new Date().toISOString().split("T")[0]}
                     value={formData.acquisitionDate || ""}
                     onChange={(e) => handleInputChange("acquisitionDate", e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                    className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                   />
                   <p className="text-xs text-zinc-500 mt-1">
                     Fecha en que pasó a ser de tu propiedad.
                   </p>
                   {errors.acquisitionDate && (
-                    <p className="text-xs text-red-600 mt-1.5">{errors.acquisitionDate}</p>
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.acquisitionDate}</p>
                   )}
                 </div>
 
                 {/* Country of Birth */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                     País de Nacimiento *
                   </label>
                   <select
                     value={formData.countryOfBirth || "México"}
                     onChange={(e) => handleInputChange("countryOfBirth", e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                    className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                   >
                     {COMMON_COUNTRIES.map((c) => (
                       <option key={c} value={c}>
@@ -790,7 +1044,7 @@ export default function HorseRegistrationWizard({
                     ))}
                   </select>
                   {errors.countryOfBirth && (
-                    <p className="text-xs text-red-600 mt-1.5">{errors.countryOfBirth}</p>
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.countryOfBirth}</p>
                   )}
                 </div>
 
@@ -804,7 +1058,7 @@ export default function HorseRegistrationWizard({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {/* Estatura Actual */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Estatura Actual *
                       </label>
                       <input
@@ -812,19 +1066,19 @@ export default function HorseRegistrationWizard({
                         value={formData.currentHeight || ""}
                         onChange={(e) => handleInputChange("currentHeight", e.target.value)}
                         placeholder="Ej. 14.2 hh ó 148 cm"
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
-                      <p className="text-[11px] text-zinc-500 mt-1">
+                      <p className="text-[11px] text-zinc-500 mt-1 font-sans">
                         En manos (hh) o centímetros.
                       </p>
                       {errors.currentHeight && (
-                        <p className="text-xs text-red-600 mt-1.5">{errors.currentHeight}</p>
+                        <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.currentHeight}</p>
                       )}
                     </div>
 
                     {/* Fecha de Estatura Actual */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Fecha de Estatura Actual *
                       </label>
                       <input
@@ -832,19 +1086,19 @@ export default function HorseRegistrationWizard({
                         max={new Date().toISOString().split("T")[0]}
                         value={formData.currentHeightDate || ""}
                         onChange={(e) => handleInputChange("currentHeightDate", e.target.value)}
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
-                      <p className="text-[11px] text-zinc-500 mt-1">
+                      <p className="text-[11px] text-zinc-500 mt-1 font-sans">
                         Fecha en que se midió.
                       </p>
                       {errors.currentHeightDate && (
-                        <p className="text-xs text-red-600 mt-1.5">{errors.currentHeightDate}</p>
+                        <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.currentHeightDate}</p>
                       )}
                     </div>
 
                     {/* Estatura Esperada */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Estatura Esperada *
                       </label>
                       <input
@@ -852,13 +1106,13 @@ export default function HorseRegistrationWizard({
                         value={formData.expectedHeight || ""}
                         onChange={(e) => handleInputChange("expectedHeight", e.target.value)}
                         placeholder="Ej. 14.2 hh ó 150 cm"
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
-                      <p className="text-[11px] text-zinc-500 mt-1">
+                      <p className="text-[11px] text-zinc-500 mt-1 font-sans">
                         Estatura estimada a la madurez.
                       </p>
                       {errors.expectedHeight && (
-                        <p className="text-xs text-red-600 mt-1.5">{errors.expectedHeight}</p>
+                        <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.expectedHeight}</p>
                       )}
                     </div>
                   </div>
@@ -884,24 +1138,30 @@ export default function HorseRegistrationWizard({
 
               {/* Has passport Checkbox Card */}
               <div
-                className={`p-5 border transition-all cursor-pointer rounded-lg ${formData.hasPassport
-                  ? "bg-red-50/40 border-red-200"
-                  : "bg-zinc-50 border-zinc-200"
-                  }`}
+                className={`p-6 border transition-all cursor-pointer rounded-xl ${
+                  formData.hasPassport
+                    ? "bg-zinc-50 border-zinc-950 ring-1 ring-zinc-950 shadow-xs"
+                    : "bg-white border-zinc-200 hover:border-zinc-300 shadow-2xs"
+                }`}
                 onClick={() => handleInputChange("hasPassport", !formData.hasPassport)}
               >
-                <label className="flex items-start gap-3.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={!!formData.hasPassport}
-                    onChange={(e) => handleInputChange("hasPassport", e.target.checked)}
-                    className="w-5 h-5 mt-0.5 text-red-700 rounded border-zinc-300 focus:ring-red-600 cursor-pointer"
-                  />
+                <label className="flex items-start gap-4 cursor-pointer">
+                  <div
+                    className={`w-5 h-5 mt-0.5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                      formData.hasPassport ? "bg-zinc-950 border-zinc-950 text-white" : "border-zinc-300 bg-white"
+                    }`}
+                  >
+                    {formData.hasPassport && (
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
                   <div>
                     <span className="text-base font-serif font-semibold text-zinc-950 block">
                       ¿Tu caballo cuenta con Pasaporte Equino Internacional?
                     </span>
-                    <span className="text-xs text-zinc-500 leading-relaxed block mt-1">
+                    <span className="text-xs text-zinc-600 leading-relaxed block mt-1 font-sans">
                       Marca esta casilla si el caballo fue importado o posee pasaporte oficial de la Unión Europea, EE. UU. u otra asociación internacional reconocida.
                     </span>
                   </div>
@@ -910,7 +1170,7 @@ export default function HorseRegistrationWizard({
 
               {/* Campos Condicionales de Pasaporte */}
               {formData.hasPassport ? (
-                <div className="p-6 bg-white border border-zinc-200 rounded-lg space-y-6 animate-fadeIn">
+                <div className="p-6 sm:p-7 bg-white border border-zinc-200 rounded-xl space-y-6 animate-fadeIn shadow-xs">
                   <div className="flex items-center gap-2 text-zinc-950 font-serif text-lg border-b border-zinc-200 pb-3">
                     <svg className="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -921,7 +1181,7 @@ export default function HorseRegistrationWizard({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Number of passport */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Número de Pasaporte (UELN) *
                       </label>
                       <input
@@ -929,16 +1189,16 @@ export default function HorseRegistrationWizard({
                         value={formData.passportNumber || ""}
                         onChange={(e) => handleInputChange("passportNumber", e.target.value)}
                         placeholder="Ej. 826073001234567"
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
                       {errors.passportNumber && (
-                        <p className="text-xs text-red-600 mt-1.5">{errors.passportNumber}</p>
+                        <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.passportNumber}</p>
                       )}
                     </div>
 
                     {/* Date of import */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Fecha de Importación a México
                       </label>
                       <input
@@ -946,19 +1206,19 @@ export default function HorseRegistrationWizard({
                         max={new Date().toISOString().split("T")[0]}
                         value={formData.importDate || ""}
                         onChange={(e) => handleInputChange("importDate", e.target.value)}
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
                     </div>
 
                     {/* Coat Color */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Color de Capa / Pelaje *
                       </label>
                       <select
                         value={formData.coatColor || ""}
                         onChange={(e) => handleInputChange("coatColor", e.target.value)}
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       >
                         <option value="">-- Selecciona el color de pelaje --</option>
                         {COMMON_COAT_COLORS.map((c) => (
@@ -968,19 +1228,19 @@ export default function HorseRegistrationWizard({
                         ))}
                       </select>
                       {errors.coatColor && (
-                        <p className="text-xs text-red-600 mt-1.5">{errors.coatColor}</p>
+                        <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.coatColor}</p>
                       )}
                     </div>
 
                     {/* Coat Pattern */}
                     <div>
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Patrón de Capa *
                       </label>
                       <select
                         value={formData.coatPattern || ""}
                         onChange={(e) => handleInputChange("coatPattern", e.target.value)}
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       >
                         <option value="">-- Selecciona el patrón de capa --</option>
                         {COMMON_COAT_PATTERNS.map((p) => (
@@ -990,13 +1250,13 @@ export default function HorseRegistrationWizard({
                         ))}
                       </select>
                       {errors.coatPattern && (
-                        <p className="text-xs text-red-600 mt-1.5">{errors.coatPattern}</p>
+                        <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.coatPattern}</p>
                       )}
                     </div>
 
                     {/* Additional color info */}
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Descripción e Información Adicional de Color
                       </label>
                       <textarea
@@ -1004,13 +1264,13 @@ export default function HorseRegistrationWizard({
                         value={formData.colorDetails || ""}
                         onChange={(e) => handleInputChange("colorDetails", e.target.value)}
                         placeholder="Describe detalles como caretos, luceros, calzados en patas o características específicas del pelaje."
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
                     </div>
 
                     {/* Microchip / Identifiers */}
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-zinc-800 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 mb-1.5">
                         Número de Microchip y/o Señas Particulares
                       </label>
                       <input
@@ -1018,20 +1278,20 @@ export default function HorseRegistrationWizard({
                         value={formData.microchipOrIdentifiers || ""}
                         onChange={(e) => handleInputChange("microchipOrIdentifiers", e.target.value)}
                         placeholder="Número de microchip, cicatrices o marcas"
-                        className="w-full bg-zinc-50 border border-zinc-300 px-4 py-3 text-zinc-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 font-sans"
+                        className="w-full bg-white border border-zinc-300 rounded-md px-4 py-3 text-sm text-zinc-950 focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 font-sans shadow-2xs"
                       />
-                      <p className="text-xs text-zinc-500 mt-1">
+                      <p className="text-xs text-zinc-500 mt-1 font-sans">
                         Si tiene microchip implantado, indícalo aquí para su verificación con el pasaporte.
                       </p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="p-6 bg-zinc-50 border border-dashed border-zinc-200 rounded-lg text-center">
-                  <p className="text-sm text-zinc-600">
+                <div className="p-6 bg-zinc-50 border border-dashed border-zinc-300 rounded-xl text-center">
+                  <p className="text-sm text-zinc-700 font-sans">
                     Has indicado que el ejemplar <strong>no cuenta con pasaporte internacional previo</strong>.
                   </p>
-                  <p className="text-xs text-zinc-400 mt-1">
+                  <p className="text-xs text-zinc-500 mt-1 font-sans">
                     El registro oficial de la GVHS México emitirá su primer certificado oficial de linaje una vez aprobadas las pruebas de ADN.
                   </p>
                 </div>
@@ -1093,29 +1353,29 @@ export default function HorseRegistrationWizard({
               </div>
 
               {/* Pruebas Obligatorias Card */}
-              <div className="bg-white border border-zinc-200 p-6 rounded-xl space-y-4 shadow-sm">
+              <div className="bg-white border border-zinc-200 p-6 sm:p-7 rounded-xl space-y-4 shadow-xs">
                 <div>
-                  <h4 className="font-serif text-lg font-medium text-zinc-950">Panel Diagnóstico Obligatorio</h4>
-                  <p className="text-xs text-zinc-500">Requisito estatutario para la autenticación de linaje</p>
+                  <h4 className="font-serif text-lg font-semibold text-zinc-950">Panel Diagnóstico Obligatorio</h4>
+                  <p className="text-xs text-zinc-500 font-sans">Requisito estatutario para la autenticación oficial de linaje</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                  <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200/80">
+                  <div className="p-5 bg-zinc-50 rounded-lg border border-zinc-200">
                     <div className="flex justify-between items-baseline mb-1">
-                      <span className="font-medium text-sm text-zinc-900">Prueba de ADN Obligatoria</span>
-                      <span className="font-semibold text-sm text-zinc-900">{formatCurrencyMxn(DNA_FEE_MXN)}</span>
+                      <span className="font-serif font-semibold text-sm text-zinc-950">Prueba de ADN Obligatoria</span>
+                      <span className="font-mono font-semibold text-sm text-zinc-950">{formatCurrencyMxn(DNA_FEE_MXN)}</span>
                     </div>
-                    <p className="text-xs text-zinc-600 leading-relaxed">
+                    <p className="text-xs text-zinc-600 font-sans leading-relaxed">
                       Verifica el parentesco genético y el perfil de marcadores de raza.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200/80">
+                  <div className="p-5 bg-zinc-50 rounded-lg border border-zinc-200">
                     <div className="flex justify-between items-baseline mb-1">
-                      <span className="font-medium text-sm text-zinc-900">Pruebas PSSM1 y FIS</span>
-                      <span className="font-semibold text-sm text-zinc-900">{formatCurrencyMxn(PSSM_FIS_FEE_MXN)}</span>
+                      <span className="font-serif font-semibold text-sm text-zinc-950">Pruebas PSSM1 y FIS</span>
+                      <span className="font-mono font-semibold text-sm text-zinc-950">{formatCurrencyMxn(PSSM_FIS_FEE_MXN)}</span>
                     </div>
-                    <p className="text-xs text-zinc-600 leading-relaxed">
+                    <p className="text-xs text-zinc-600 font-sans leading-relaxed">
                       Detección de Miopatía por Almacenamiento de Polisacáridos y Síndrome de Inmunodeficiencia del Potro.
                     </p>
                   </div>
@@ -1123,36 +1383,36 @@ export default function HorseRegistrationWizard({
               </div>
 
               {/* Políticas e Información Oficial */}
-              <div className="bg-white border border-zinc-200 p-6 rounded-xl shadow-sm">
-                <ul className="space-y-2.5 text-xs text-zinc-700 leading-relaxed">
-                  <li className="flex items-start gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200/60">
-                    <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+              <div className="bg-white border border-zinc-200 p-6 sm:p-7 rounded-xl shadow-xs">
+                <ul className="space-y-3 text-xs text-zinc-700 leading-relaxed font-sans">
+                  <li className="flex items-start gap-3 p-3.5 bg-zinc-50 rounded-lg border border-zinc-200/80">
+                    <div className="w-5 h-5 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span>{GVHS_POLICIES_TEXT.dnaFormNotice}</span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200/60">
-                    <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                  <li className="flex items-start gap-3 p-3.5 bg-zinc-50 rounded-lg border border-zinc-200/80">
+                    <div className="w-5 h-5 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span>{GVHS_POLICIES_TEXT.resultsNotice}</span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200/60">
-                    <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                  <li className="flex items-start gap-3 p-3.5 bg-zinc-50 rounded-lg border border-zinc-200/80">
+                    <div className="w-5 h-5 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span>{GVHS_POLICIES_TEXT.privacyNotice}</span>
                   </li>
-                  <li className="flex items-start gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200/60">
-                    <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                  <li className="flex items-start gap-3 p-3.5 bg-zinc-50 rounded-lg border border-zinc-200/80">
+                    <div className="w-5 h-5 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <span><strong>{GVHS_POLICIES_TEXT.certificatePrintNotice}</strong></span>
@@ -1161,51 +1421,71 @@ export default function HorseRegistrationWizard({
               </div>
 
               {/* Resumen Final de Datos */}
-              <div className="bg-white border border-zinc-200 p-6 rounded-lg text-sm space-y-4">
+              <div className="bg-white border border-zinc-200 p-6 sm:p-7 rounded-xl text-sm space-y-4 shadow-xs">
                 <h4 className="font-serif text-base font-semibold text-zinc-950 pb-2 border-b border-zinc-200">
                   Revisión de Datos del Ejemplar
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-zinc-600">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-zinc-600 font-sans">
                   <div>
-                    <span className="text-zinc-400 block">Nombre del Caballo:</span>
-                    <strong className="text-zinc-900 text-sm">{formData.horseName}</strong>
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Nombre Oficial Completo:</span>
+                    <strong className="text-zinc-950 text-base font-serif">
+                      {(initialFarmPrefix || (formData.wantsToPurchasePrefix && formData.farmPrefix?.trim()))
+                        ? `${initialFarmPrefix || formData.farmPrefix?.trim()} ${formData.horseName}`
+                        : formData.horseName}
+                    </strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">Propietario Registrado:</span>
-                    <strong className="text-zinc-900 text-sm">{formData.ownerName}</strong>
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Prefijo de Criadero / Rancho:</span>
+                    <strong className="text-zinc-950 text-xs font-sans">
+                      {initialFarmPrefix ? (
+                        <span className="text-zinc-950 font-semibold">
+                          {initialFarmPrefix} (Registrado previamente — $0 MXN)
+                        </span>
+                      ) : formData.wantsToPurchasePrefix && formData.farmPrefix ? (
+                        <span className="text-red-700 font-semibold">
+                          {formData.farmPrefix} (Nuevo registro — +${formatCurrencyMxn(PREFIX_FEE_MXN)})
+                        </span>
+                      ) : (
+                        <span className="text-zinc-500 font-normal">Ninguno (Registro simple)</span>
+                      )}
+                    </strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">Género:</span>
-                    <strong className="text-zinc-900">
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Propietario Registrado:</span>
+                    <strong className="text-zinc-950 text-sm font-sans">{formData.ownerName}</strong>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Género:</span>
+                    <strong className="text-zinc-950 font-sans">
                       {formData.gender === "stallion" ? "Semental" : "Yegua"}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">Fecha de Nacimiento y Categoría:</span>
-                    <strong className="text-zinc-900">
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Fecha de Nacimiento y Categoría:</span>
+                    <strong className="text-zinc-950 font-sans">
                       {formData.birthDate} ({feeBreakdown.categoryLabel})
                     </strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">País de Origen:</span>
-                    <strong className="text-zinc-900">{formData.countryOfBirth}</strong>
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">País de Origen:</span>
+                    <strong className="text-zinc-950 font-sans">{formData.countryOfBirth}</strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">Pasaporte Internacional:</span>
-                    <strong className="text-zinc-900">
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Pasaporte Internacional:</span>
+                    <strong className="text-zinc-950 font-sans">
                       {formData.hasPassport ? `Sí (No. ${formData.passportNumber})` : "No posee"}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">Estatura Actual:</span>
-                    <strong className="text-zinc-900">
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Estatura Actual:</span>
+                    <strong className="text-zinc-950 font-sans">
                       {formData.currentHeight || "No especificada"}
                       {formData.currentHeightDate ? ` (Medida el ${formData.currentHeightDate})` : ""}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-zinc-400 block">Estatura Esperada:</span>
-                    <strong className="text-zinc-900">
+                    <span className="text-zinc-500 block text-[11px] uppercase tracking-wider">Estatura Esperada:</span>
+                    <strong className="text-zinc-950 font-sans">
                       {formData.expectedHeight || "No especificada"}
                     </strong>
                   </div>
@@ -1220,7 +1500,7 @@ export default function HorseRegistrationWizard({
                     <button
                       type="button"
                       onClick={() => setCurrentStep(4)}
-                      className="text-[11px] text-zinc-600 hover:text-zinc-950 font-medium underline cursor-pointer"
+                      className="text-[11px] text-zinc-600 hover:text-red-700 font-medium underline cursor-pointer transition-colors"
                     >
                       Modificar pruebas
                     </button>
@@ -1232,13 +1512,13 @@ export default function HorseRegistrationWizard({
                         return (
                           <span
                             key={tId}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-50 border border-zinc-200 rounded-md text-xs text-zinc-800"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-50 border border-zinc-200 rounded-md text-xs text-zinc-800"
                           >
                             <span className="font-mono text-[10px] text-zinc-500 font-semibold">
                               {info?.locus || "DNA"}
                             </span>
                             <span className="font-medium">{info?.name || tId}</span>
-                            <span className="text-[11px] font-semibold text-zinc-900">
+                            <span className="text-[11px] font-semibold text-zinc-950 font-mono">
                               ${formatCurrencyMxn(450)}
                             </span>
                           </span>
@@ -1246,7 +1526,7 @@ export default function HorseRegistrationWizard({
                       })}
                     </div>
                   ) : (
-                    <p className="text-xs text-zinc-500 italic">
+                    <p className="text-xs text-zinc-500 italic font-sans">
                       No se han seleccionado pruebas de color adicionales. (Paso opcional).
                     </p>
                   )}
@@ -1262,7 +1542,7 @@ export default function HorseRegistrationWizard({
                       <button
                         type="button"
                         onClick={() => setCurrentStep(3)}
-                        className="text-[11px] text-zinc-600 hover:text-zinc-950 font-medium underline cursor-pointer"
+                        className="text-[11px] text-zinc-600 hover:text-red-700 font-medium underline cursor-pointer transition-colors"
                       >
                         Modificar fotos
                       </button>
@@ -1325,14 +1605,14 @@ export default function HorseRegistrationWizard({
                     type="checkbox"
                     checked={!!formData.acknowledgePolicies}
                     onChange={(e) => handleInputChange("acknowledgePolicies", e.target.checked)}
-                    className="w-5 h-5 mt-0.5 text-zinc-900 rounded border-zinc-300 focus:ring-zinc-800 cursor-pointer"
+                    className="w-5 h-5 mt-0.5 text-zinc-950 rounded border-zinc-300 focus:ring-zinc-950 cursor-pointer"
                   />
-                  <span className="text-xs text-zinc-700 leading-relaxed">
+                  <span className="text-xs text-zinc-700 leading-relaxed font-sans">
                     He leído y acepto los términos de pre-registro, el envío del kit de muestra capilar y la inclusión de los resultados genéticos en el expediente y certificado de la GVHS México.
                   </span>
                 </label>
                 {errors.acknowledgePolicies && (
-                  <p className="text-xs text-red-600 mt-1.5">{errors.acknowledgePolicies}</p>
+                  <p className="text-xs text-red-700 mt-1.5 font-medium">{errors.acknowledgePolicies}</p>
                 )}
               </div>
             </div>
@@ -1345,14 +1625,14 @@ export default function HorseRegistrationWizard({
                 type="button"
                 onClick={handleBack}
                 disabled={isSubmitting}
-                className="px-6 py-3.5 bg-zinc-100 text-zinc-800 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-200 transition-colors"
+                className="px-6 py-3 bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-900 text-xs font-semibold uppercase tracking-wider rounded-md transition-colors cursor-pointer"
               >
                 ← Paso Anterior
               </button>
             ) : (
               <Link
                 href="/dashboard"
-                className="text-xs text-zinc-500 hover:text-zinc-900 transition-colors uppercase tracking-wider"
+                className="text-xs text-zinc-500 hover:text-zinc-950 transition-colors uppercase tracking-wider font-semibold"
               >
                 Cancelar
               </Link>
@@ -1363,7 +1643,7 @@ export default function HorseRegistrationWizard({
                 key={`btn-next-step-${currentStep}`}
                 type="button"
                 onClick={handleNext}
-                className="px-8 py-3.5 bg-zinc-950 text-white text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="px-8 py-3 bg-zinc-950 text-white text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
               >
                 Continuar al Paso {currentStep + 1} →
               </button>
@@ -1373,7 +1653,7 @@ export default function HorseRegistrationWizard({
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-8 py-4 bg-red-700 text-white text-xs font-semibold uppercase tracking-wider hover:bg-red-800 transition-colors shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="px-8 py-3.5 bg-red-700 text-white text-xs font-semibold uppercase tracking-wider hover:bg-red-800 rounded-md transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>

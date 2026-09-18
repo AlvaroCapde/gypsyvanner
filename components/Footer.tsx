@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   const year = new Date().getFullYear();
   
@@ -19,7 +21,7 @@ export default function Footer() {
             <h4 className="text-zinc-100 font-sans text-xs font-bold uppercase tracking-wider">Contacto Directo</h4>
             <ul className="space-y-3 text-sm text-zinc-400 font-sans">
               <li>
-                Roberto Mena:{" "}
+                Roberto Mena (MVZ):{" "}
                 <a 
                   href="https://wa.me/523312947594" 
                   target="_blank" 
@@ -60,7 +62,7 @@ export default function Footer() {
               <li><a href="#faq" className="hover:text-white transition-colors">Preguntas Frecuentes (FAQ)</a></li>
               <li><a href="#terminos" className="hover:text-white transition-colors">Términos y Condiciones</a></li>
               <li><a href="#privacidad" className="hover:text-white transition-colors">Aviso de Privacidad</a></li>
-              <li><a href="#registro" className="hover:text-white transition-colors">Pre-Registro y Membresía</a></li>
+              <li><Link href="/registro" className="hover:text-white transition-colors">Pre-Registro y Membresía</Link></li>
             </ul>
           </div>
 

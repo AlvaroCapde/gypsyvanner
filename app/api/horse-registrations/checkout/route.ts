@@ -37,10 +37,27 @@ export async function POST(request: Request) {
 
     const validated = validationResult.data;
 
-    // Calcular tarifas de forma autoritativa (incluyendo pruebas de color opcionales)
+    // Verificar si el usuario ya cuenta con un prefijo oficial registrado en su membresía
+    const { data: userMembership } = await supabaseAdmin
+      .from("memberships")
+      .select("farm_prefix")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const hasDbPrefix = Boolean(userMembership?.farm_prefix);
+    const isPurchasingPrefix = !hasDbPrefix && Boolean(validated.wantsToPurchasePrefix);
+    const finalFarmPrefix = hasDbPrefix
+      ? userMembership?.farm_prefix
+      : isPurchasingPrefix
+      ? validated.farmPrefix?.trim() || null
+      : null;
+
+    // Calcular tarifas de forma autoritativa (incluyendo pruebas de color y prefijo si aplica)
     const feeBreakdown = calculateHorseFee(
       validated.birthDate,
-      validated.selectedColorTests || []
+      validated.selectedColorTests || [],
+      isPurchasingPrefix,
+      finalFarmPrefix || ""
     );
 
     // 1. Guardar o actualizar registro preliminar en la base de datos (con estatus pending_payment)
@@ -48,6 +65,10 @@ export async function POST(request: Request) {
     const fullPayload = {
       user_id: user.id,
       horse_name: validated.horseName.trim(),
+      farm_prefix: finalFarmPrefix,
+      is_purchasing_prefix: isPurchasingPrefix,
+      prefix_fee_usd: feeBreakdown.prefixFeeUsd,
+      prefix_fee_mxn: feeBreakdown.prefixFeeMxn,
       owner_name: validated.ownerName.trim(),
       acquisition_date: validated.acquisitionDate,
       gender: validated.gender,
@@ -86,7 +107,7 @@ export async function POST(request: Request) {
       status: "pending_payment",
     };
 
-    // Payload de compatibilidad (sin columnas de platform fee ni color tests ni estatura por si no se han migrado en la BD)
+    // Payload de compatibilidad (sin columnas de platform fee, color tests, estatura ni prefijo si aún no se ejecutan migraciones)
     const {
       subtotal_fee_mxn: _sub,
       platform_fee_mxn: _pf,
@@ -97,6 +118,10 @@ export async function POST(request: Request) {
       current_height: _ch,
       current_height_date: _chd,
       expected_height: _eh,
+      farm_prefix: _fp,
+      is_purchasing_prefix: _ipp,
+      prefix_fee_usd: _pfu,
+      prefix_fee_mxn: _pfm,
       ...legacyPayload
     } = fullPayload;
 
@@ -134,7 +159,7 @@ export async function POST(request: Request) {
         updateError &&
         (updateError.message?.includes("column") || (updateError as any).code === "PGRST204")
       ) {
-        console.warn("Reintentando actualización sin columnas de platform fee:", updateError.message);
+        console.warn("Reintentando actualización sin columnas nuevas:", updateError.message);
         const retryUpdate = await supabaseAdmin
           .from("horse_registrations")
           .update(legacyPayload)
@@ -163,7 +188,7 @@ export async function POST(request: Request) {
         insertError &&
         (insertError.message?.includes("column") || (insertError as any).code === "PGRST204")
       ) {
-        console.warn("Reintentando inserción sin columnas nuevas de platform fee:", insertError.message);
+        console.warn("Reintentando inserción sin columnas nuevas:", insertError.message);
         const retryResult = await supabaseAdmin
           .from("horse_registrations")
           .insert(legacyPayload)
@@ -203,7 +228,9 @@ export async function POST(request: Request) {
           price_data: {
             currency: "mxn",
             product_data: {
-              name: `Pre-Registro de Ejemplar: ${validated.horseName.trim()}`,
+              name: `Pre-Registro de Ejemplar: ${
+                finalFarmPrefix ? `${finalFarmPrefix} ` : ""
+              }${validated.horseName.trim()}`,
               description: `Tarifa de pre-registro según categoría (${feeBreakdown.categoryLabel}).`,
             },
             unit_amount: Math.round(feeBreakdown.baseFeeMxn * 100),
@@ -249,6 +276,21 @@ export async function POST(request: Request) {
               },
             ]
           : []),
+        ...(isPurchasingPrefix
+          ? [
+              {
+                price_data: {
+                  currency: "mxn",
+                  product_data: {
+                    name: `Registro Oficial de Prefijo: ${finalFarmPrefix}`,
+                    description: "Adquisición y protección exclusiva de prefijo para criadero ante GVHS México.",
+                  },
+                  unit_amount: Math.round(feeBreakdown.prefixFeeMxn * 100),
+                },
+                quantity: 1,
+              },
+            ]
+          : []),
         {
           price_data: {
             currency: "mxn",
@@ -266,6 +308,9 @@ export async function POST(request: Request) {
         registrationId,
         userId: user.id,
         horseName: validated.horseName.trim(),
+        farmPrefix: finalFarmPrefix || "",
+        isPurchasingPrefix: String(isPurchasingPrefix),
+        prefixFeeMxn: String(feeBreakdown.prefixFeeMxn),
         ownerName: validated.ownerName.trim(),
         userEmail: user.email || "",
         subtotalMxn: String(feeBreakdown.subtotalFeeMxn),

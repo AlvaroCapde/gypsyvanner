@@ -33,7 +33,7 @@ export default function ContactCTA() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="flex flex-col items-center">
-              <span className="font-serif text-lg font-medium text-zinc-900">Roberto Mena</span>
+              <span className="font-serif text-lg font-medium text-zinc-900">Roberto Mena (MVZ)</span>
               <a 
                 href="https://wa.me/523312947594" 
                 target="_blank" 

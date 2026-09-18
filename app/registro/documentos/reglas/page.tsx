@@ -127,8 +127,23 @@ export default function RegistrationRulesPage() {
             <li>Firmas de ambos.</li>
           </ol>
         </li>
-        <li><strong>DENEGACIÓN DE SOLICITUD:</strong> Cualquier solicitud de registro o transferencia puede ser denegada si hay irregularidades. La carga de la prueba es del solicitante. En caso de denegación, el Registrador enviará un aviso por escrito en 60 días. Las tarifas no son reembolsables.</li>
-        <li><strong>PROCESO DE APELACIÓN:</strong> Si se deniega el registro, el dueño puede enviar nuevas fotos en el futuro, o apelar a la Junta Directiva de la GVHS para revisión de la decisión. Alternativamente, presentar al caballo en una Evaluación GVHS; si obtiene puntuación alta (7+ en tipo de raza y 70+ general), será registrado en el Libro Regular.</li>
+        <li><strong>DENEGACIÓN DE SOLICITUD:</strong>
+          <ol>
+            <li>Cualquier solicitud de registro o transferencia puede ser denegada si no se establece a satisfacción del Registrador que todos los asuntos relacionados con el registro o transferencia están en orden.</li>
+            <li>Para cualquier situación en la que parezca que puede haber habido irregularidades en relación con el registro o la transferencia de cualquier caballo, el Registrador puede requerir que el propietario registrado proporcione informes de tipo de sangre o análisis de ADN y otros documentos relacionados con las circunstancias del registro o la transferencia.</li>
+            <li>El solicitante tiene la carga de la prueba para el registro o la transferencia de un caballo.</li>
+            <li>Si se deniega el registro o la transferencia, el Registrador enviará una notificación al propietario por correo o correo electrónico, indicando la razón de la denegación. El proceso de registro o transferencia debe resultar en que el propietario reciba una carta de aprobación o denegación dentro de los 60 días.</li>
+          </ol>
+          <p>Ya sea que un caballo sea aceptado para el registro o denegado, las tarifas no son reembolsables. Un caballo puede ser reenviado.</p>
+        </li>
+        <li><strong>PROCESO DE APELACIÓN PARA REGISTROS DENEGADOS:</strong>
+          <p className="my-2">Si el registro de un caballo ha sido rechazado por el Comité de Registro pero cumple con todos los demás requisitos, el propietario tiene derecho a apelar la decisión de la siguiente manera:</p>
+          <ol>
+            <li>Si el caballo puede presentarse mejor en otras fotos, se pueden enviar nuevas o futuras fotos al registrador, quien las reenviará al Comité de Registro. No hay límite de tiempo para hacerlo.</li>
+            <li>Solicitar que el Registrador envíe las fotos e información sobre el caballo a la Junta Directiva de GVHS para solicitar una revisión de la decisión de registro.</li>
+            <li>Presentar el caballo en una Evaluación de GVHS, pagando la tarifa de evaluación. Si el caballo obtiene una puntuación de 7 (x2) o superior en tipo de raza Y una puntuación general de 70 o superior, se registrará en el Libro Genealógico Regular de GVHS.</li>
+          </ol>
+        </li>
       </ol>
     </DocumentViewer>
   );

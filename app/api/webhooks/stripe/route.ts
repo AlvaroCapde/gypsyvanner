@@ -91,6 +91,22 @@ export async function POST(req: Request) {
           return new NextResponse("Error updating horse registration", { status: 500 });
         }
 
+        // Si la solicitud incluyó la compra de un nuevo prefijo oficial de rancho,
+        // guardarlo permanentemente en el perfil de membresía del socio
+        if (metadata.isPurchasingPrefix === "true" && metadata.farmPrefix && metadata.userId) {
+          try {
+            await supabaseAdmin
+              .from("memberships")
+              .update({ farm_prefix: metadata.farmPrefix })
+              .eq("id", metadata.userId);
+            console.log(
+              `Prefijo oficial "${metadata.farmPrefix}" vinculado exitosamente a la membresía del usuario ${metadata.userId}`
+            );
+          } catch (prefixErr) {
+            console.warn("No se pudo actualizar farm_prefix en memberships desde webhook:", prefixErr);
+          }
+        }
+
         console.log(`Registro de caballo ${registrationId} actualizado a pagado / en revisión.`);
         return new NextResponse("Success", { status: 200 });
       } catch (err: any) {

@@ -38,6 +38,7 @@ export default async function RegistroCaballoPage() {
   const memberName = membership?.name || user.user_metadata?.full_name || "Socio GVHS";
   const memberEmail = membership?.email || user.email || user.user_metadata?.email || "";
   const farmName = membership?.farm_name || user.user_metadata?.farm_name || "";
+  const farmPrefix = membership?.farm_prefix || user.user_metadata?.farm_prefix || "";
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
@@ -113,6 +114,8 @@ export default async function RegistroCaballoPage() {
           <HorseRegistrationWizard
             initialOwnerName={memberName}
             userEmail={memberEmail}
+            initialFarmPrefix={farmPrefix}
+            farmName={farmName}
           />
         </Suspense>
       </main>

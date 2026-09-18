@@ -285,11 +285,16 @@ export default function SuccessPage() {
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 font-sans">
       <header className="w-full bg-zinc-950 px-6 sm:px-12 py-6 border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-white font-serif text-2xl tracking-wider">
-            GVHS<span className="text-red-600">.</span>
-          </Link>
-          <Link href="/" className="text-zinc-400 text-sm tracking-wide hover:text-white transition-colors">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-white font-serif text-2xl tracking-wider">
+              GVHS<span className="text-red-600">.</span>
+            </Link>
+            <span className="hidden sm:inline-block text-xs text-zinc-400 border-l border-zinc-700/80 pl-4 font-sans tracking-wide">
+              El Registro Oficial del Caballo Gypsy Vanner en México
+            </span>
+          </div>
+          <Link href="/" className="text-zinc-400 text-sm tracking-wide hover:text-white transition-colors shrink-0">
             Volver al inicio
           </Link>
         </div>

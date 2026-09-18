@@ -8,6 +8,8 @@ export const PSSM_FIS_FEE_USD = 180;
 export const PSSM_FIS_FEE_MXN = PSSM_FIS_FEE_USD * USD_TO_MXN_RATE; // 3,240 MXN
 export const COLOR_TEST_FEE_USD = 25;
 export const COLOR_TEST_FEE_MXN = COLOR_TEST_FEE_USD * USD_TO_MXN_RATE; // 450 MXN
+export const PREFIX_FEE_USD = 200; // Tarifa oficial de adquisición y registro de prefijo de rancho (USD)
+export const PREFIX_FEE_MXN = PREFIX_FEE_USD * USD_TO_MXN_RATE; // 3,600 MXN
 
 export interface ColorTestOption {
   id: string;
@@ -243,6 +245,11 @@ export interface HorseFeeBreakdown {
   colorTestsFeeUsd: number;
   colorTestsFeeMxn: number;
   selectedColorTests: string[];
+  hasExistingPrefix?: boolean;
+  isPurchasingPrefix?: boolean;
+  farmPrefix?: string;
+  prefixFeeUsd: number;
+  prefixFeeMxn: number;
   subtotalFeeMxn: number;
   platformFeeMxn: number;
   totalFeeUsd: number;
@@ -250,7 +257,8 @@ export interface HorseFeeBreakdown {
 }
 
 /**
- * Calculates the horse registration fee based on the date of birth and optional color tests.
+ * Calculates the horse registration fee based on the date of birth, optional color tests,
+ * and optional ranch prefix purchase ($200 USD / $3,600 MXN).
  *
  * Rules:
  * - Born in 2017 or earlier: Hardship base fee of $250 USD ($4,500 MXN)
@@ -261,21 +269,28 @@ export interface HorseFeeBreakdown {
  * - Mandatory DNA testing: $80 USD ($1,440 MXN)
  * - Mandatory PSSM1 & FIS testing: $180 USD ($3,240 MXN)
  * - Optional Color testing: $25 USD ($450 MXN) per test selected
+ * - Optional Ranch Prefix Registration: $200 USD ($3,600 MXN)
  * - Exchange rate: $18 MXN / USD
  */
 export function calculateHorseFee(
   birthDateStr: string,
-  selectedColorTests: string[] = []
+  selectedColorTests: string[] = [],
+  isPurchasingPrefix: boolean = false,
+  farmPrefix: string = ""
 ): HorseFeeBreakdown {
   const colorTestsCount = selectedColorTests.length;
   const colorTestsFeeUsd = colorTestsCount * COLOR_TEST_FEE_USD;
   const colorTestsFeeMxn = colorTestsCount * COLOR_TEST_FEE_MXN;
 
+  const prefixFeeUsd = isPurchasingPrefix ? PREFIX_FEE_USD : 0;
+  const prefixFeeMxn = isPurchasingPrefix ? PREFIX_FEE_MXN : 0;
+
   if (!birthDateStr) {
     // Default fallback breakdown (0-6 months)
     const baseFeeUsd = 75;
     const baseFeeMxn = baseFeeUsd * USD_TO_MXN_RATE;
-    const subtotalFeeMxn = baseFeeMxn + DNA_FEE_MXN + PSSM_FIS_FEE_MXN + colorTestsFeeMxn;
+    const subtotalFeeMxn =
+      baseFeeMxn + DNA_FEE_MXN + PSSM_FIS_FEE_MXN + colorTestsFeeMxn + prefixFeeMxn;
     const { platformFeeMxn, totalMxn } = calculatePlatformFee(subtotalFeeMxn);
 
     return {
@@ -293,9 +308,14 @@ export function calculateHorseFee(
       colorTestsFeeUsd,
       colorTestsFeeMxn,
       selectedColorTests,
+      isPurchasingPrefix,
+      farmPrefix,
+      prefixFeeUsd,
+      prefixFeeMxn,
       subtotalFeeMxn,
       platformFeeMxn,
-      totalFeeUsd: baseFeeUsd + DNA_FEE_USD + PSSM_FIS_FEE_USD + colorTestsFeeUsd,
+      totalFeeUsd:
+        baseFeeUsd + DNA_FEE_USD + PSSM_FIS_FEE_USD + colorTestsFeeUsd + prefixFeeUsd,
       totalFeeMxn: totalMxn,
     };
   }
@@ -308,9 +328,11 @@ export function calculateHorseFee(
   const birthDate = new Date(birthYear, birthMonth, birthDay);
 
   const today = new Date();
-  
+
   // Calculate total months of age
-  let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+  let months =
+    (today.getFullYear() - birthDate.getFullYear()) * 12 +
+    (today.getMonth() - birthDate.getMonth());
   if (today.getDate() < birthDate.getDate()) {
     months -= 1;
   }
@@ -325,7 +347,9 @@ export function calculateHorseFee(
   } else if (remainingMonths === 0) {
     ageFormatted = `${years} ${years === 1 ? "año" : "años"}`;
   } else {
-    ageFormatted = `${years} ${years === 1 ? "año" : "años"} y ${remainingMonths} ${remainingMonths === 1 ? "mes" : "meses"}`;
+    ageFormatted = `${years} ${years === 1 ? "año" : "años"} y ${remainingMonths} ${
+      remainingMonths === 1 ? "mes" : "meses"
+    }`;
   }
 
   let ageCategory: AgeCategory;
@@ -357,9 +381,11 @@ export function calculateHorseFee(
   }
 
   const baseFeeMxn = baseFeeUsd * USD_TO_MXN_RATE;
-  const subtotalFeeMxn = baseFeeMxn + DNA_FEE_MXN + PSSM_FIS_FEE_MXN + colorTestsFeeMxn;
+  const subtotalFeeMxn =
+    baseFeeMxn + DNA_FEE_MXN + PSSM_FIS_FEE_MXN + colorTestsFeeMxn + prefixFeeMxn;
   const { platformFeeMxn, totalMxn } = calculatePlatformFee(subtotalFeeMxn);
-  const totalFeeUsd = baseFeeUsd + DNA_FEE_USD + PSSM_FIS_FEE_USD + colorTestsFeeUsd;
+  const totalFeeUsd =
+    baseFeeUsd + DNA_FEE_USD + PSSM_FIS_FEE_USD + colorTestsFeeUsd + prefixFeeUsd;
   const totalFeeMxn = totalMxn;
 
   return {
@@ -377,6 +403,10 @@ export function calculateHorseFee(
     colorTestsFeeUsd,
     colorTestsFeeMxn,
     selectedColorTests,
+    isPurchasingPrefix,
+    farmPrefix,
+    prefixFeeUsd,
+    prefixFeeMxn,
     subtotalFeeMxn,
     platformFeeMxn,
     totalFeeUsd,
@@ -386,7 +416,11 @@ export function calculateHorseFee(
 
 export const horseRegistrationSchema = z
   .object({
-    // Step 1: Identidad
+    // Step 1: Identidad y Prefijo de Rancho
+    hasExistingPrefix: z.boolean().default(false),
+    wantsToPurchasePrefix: z.boolean().default(false),
+    farmPrefix: z.string().optional(),
+
     horseName: z
       .string()
       .min(2, "El nombre solicitado del caballo es requerido.")
@@ -443,6 +477,23 @@ export const horseRegistrationSchema = z
     draftId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.wantsToPurchasePrefix) {
+      const cleanPrefix = data.farmPrefix?.trim() || "";
+      if (cleanPrefix.length < 2) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["farmPrefix"],
+          message: "El prefijo oficial debe contener al menos 2 caracteres.",
+        });
+      } else if (cleanPrefix.length > 30) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["farmPrefix"],
+          message: "El prefijo no debe superar los 30 caracteres.",
+        });
+      }
+    }
+
     if (data.hasPassport) {
       if (!data.passportNumber || data.passportNumber.trim().length === 0) {
         ctx.addIssue({

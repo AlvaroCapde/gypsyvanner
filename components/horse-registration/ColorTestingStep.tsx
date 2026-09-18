@@ -84,11 +84,11 @@ export default function ColorTestingStep({
       </div>
 
       {/* Banner de Estado de Selección */}
-      <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
-        <div className="flex items-start sm:items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center flex-shrink-0 text-zinc-700 shadow-xs">
+      <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-l-zinc-950 shadow-xs">
+        <div className="flex items-start sm:items-center gap-4">
+          <div className="w-10 h-10 rounded-md bg-zinc-950 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
             </svg>
           </div>
           <div>
@@ -99,12 +99,12 @@ export default function ColorTestingStep({
                   : `${selectedTests.length} prueba${selectedTests.length > 1 ? "s" : ""} de color seleccionada${selectedTests.length > 1 ? "s" : ""}`}
               </span>
               {selectedTests.length > 0 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                <span className="inline-flex items-center px-2 py-0.5 rounded bg-zinc-950 text-white text-[11px] font-mono font-medium">
                   +{formatCurrencyMxn(totalSelectedCostMxn)}
                 </span>
               )}
             </div>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-xs text-zinc-600 mt-1 font-sans">
               {selectedTests.length === 0
                 ? "Este paso es 100% opcional. Si no deseas pruebas de color, puedes continuar directamente al siguiente paso."
                 : "Se añadirán al formato de ADN y se enviarán junto con las muestras capilares obligatorias."}
@@ -117,7 +117,7 @@ export default function ColorTestingStep({
             <button
               type="button"
               onClick={handleDeselectAll}
-              className="text-xs text-red-700 hover:text-red-800 font-medium px-3 py-1.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
+              className="text-xs text-zinc-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-md hover:bg-zinc-100 transition-colors cursor-pointer"
             >
               Desmarcar todas
             </button>
@@ -140,10 +140,10 @@ export default function ColorTestingStep({
               key={cat.id}
               type="button"
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all cursor-pointer ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
                 activeCategory === cat.id
                   ? "bg-zinc-950 text-white shadow-xs"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  : "bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100"
               }`}
             >
               {cat.label}
@@ -158,7 +158,7 @@ export default function ColorTestingStep({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar prueba o gen..."
-            className="w-full bg-white border border-zinc-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-950 placeholder:text-zinc-400"
+            className="w-full bg-white border border-zinc-300 rounded-md pl-8 pr-3 py-1.5 text-xs text-zinc-950 focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 placeholder:text-zinc-400 font-sans"
           />
           <svg
             className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5"
