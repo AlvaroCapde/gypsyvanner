@@ -346,7 +346,7 @@ function ConfirmationContent() {
             </span>
             <div>
               <strong className="text-zinc-900 block mb-0.5">Inspección Oficial GVHS (Marzo)</strong>
-              Con las pruebas genéticas concluidas y el expediente en orden, tu ejemplar deberá presentarse a la inspección oficial presencial evaluada por los jueces oficiales de la GVHS en marzo de 2026, donde se determinará si califica como Gypsy Vanner.
+              Con las pruebas genéticas concluidas y el expediente en orden, tu ejemplar deberá presentarse a la inspección oficial presencial evaluada por los jueces oficiales de la GVHS en marzo de 2027, donde se determinará si califica como Gypsy Vanner.
             </div>
           </div>
 

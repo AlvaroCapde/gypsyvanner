@@ -65,7 +65,7 @@ const FAQS: FAQItem[] = [
     question: "¿El pago de membresía y pre-registro asegura que mi caballo será certificado como Gypsy Vanner?",
     answer: (
       <p>
-        <strong className="font-semibold text-zinc-900">No.</strong> El pago cubre los derechos de gestión del trámite, análisis de laboratorio y evaluación del expediente. La determinación y decisión de si el ejemplar califica como <strong className="font-semibold text-zinc-900">Gypsy Vanner</strong> y puede ser certificado la realizarán exclusivamente los <strong className="font-semibold text-zinc-900">jueces oficiales de GVHS</strong> en la <strong className="font-semibold text-zinc-900">inspección oficial en Mexico en Marzo 2027</strong>, tras la revisión de sus pruebas genéticas y morfológicas.
+        <strong className="font-semibold text-zinc-900">No.</strong> El pago cubre los derechos de gestión del trámite, análisis de laboratorio y evaluación del expediente. La determinación y decisión de si el ejemplar califica como <strong className="font-semibold text-zinc-900">Gypsy Vanner</strong> y puede obtener el certificado la realizarán exclusivamente los <strong className="font-semibold text-zinc-900">jueces oficiales de GVHS</strong> en la <strong className="font-semibold text-zinc-900">inspección oficial en Mexico en Marzo 2027</strong>, tras la revisión de sus pruebas genéticas y morfológicas.
       </p>
     ),
   },
@@ -83,6 +83,28 @@ const FAQS: FAQItem[] = [
         </Link>{" "}
         y haber completado todos los <strong className="font-semibold text-zinc-900">requerimientos de pre-registro</strong> (expediente fotográfico, microchip y resultados de pruebas genéticas de ADN, PSSM1 y FIS) para que tu caballo pueda ser inscrito y evaluado por los jueces oficiales de la GVHS.
       </p>
+    ),
+  },
+  {
+    id: "color-base-vs-patron",
+    question: "¿Cuál es la diferencia entre el color base de la capa del manto y el patrón de la capa del manto?",
+    answer: (
+      <div className="space-y-3">
+        <p>
+          La diferencia principal es que el <strong className="font-semibold text-zinc-900">color base</strong> define la pigmentación de fondo del pelaje, mientras que el <strong className="font-semibold text-zinc-900">patrón</strong> define el diseño y distribución de las manchas blancas sobre ese fondo:
+        </p>
+        <ul className="list-disc pl-5 space-y-1.5">
+          <li>
+            <strong className="font-semibold text-zinc-900">Color Base del Manto:</strong> Es la pigmentación genética de fondo (el &quot;lienzo&quot; del caballo). Todos los pelajes equinos parten de tres colores fundamentales: <strong className="font-semibold text-zinc-900">Negro</strong>, <strong className="font-semibold text-zinc-900">Castaño / Bayo</strong> o <strong className="font-semibold text-zinc-900">Alazán / Rojo</strong>, sobre los cuales pueden actuar genes de dilución (como crema, perla, dun o plata).
+          </li>
+          <li>
+            <strong className="font-semibold text-zinc-900">Patrón del Manto:</strong> Es la disposición o diseño de las manchas blancas sobre el cuerpo del ejemplar. En la raza Gypsy Vanner son muy comunes patrones como <strong className="font-semibold text-zinc-900">Tobiano</strong>, <strong className="font-semibold text-zinc-900">Sabino</strong>, <strong className="font-semibold text-zinc-900">Splashed White / Blagdon</strong>, <strong className="font-semibold text-zinc-900">Overo</strong>, o bien ejemplares <strong className="font-semibold text-zinc-900">Sólidos</strong> (sin manchas corporales).
+          </li>
+        </ul>
+        <p>
+          <strong className="font-semibold text-zinc-900">Ejemplo práctico:</strong> Un Gypsy Vanner pío de negro con blanco posee como <strong className="font-semibold text-zinc-900">color base</strong> el Negro y como <strong className="font-semibold text-zinc-900">patrón</strong> el Tobiano (fenotipo conocido tradicionalmente como <em>Piebald</em>).
+        </p>
+      </div>
     ),
   },
 ];

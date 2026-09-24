@@ -63,7 +63,7 @@ const STEPS: Step[] = [
       "Gestión y acompañamiento técnico",
       "Requisito reglamentario para inspección",
     ],
-    hasCost: false,
+    hasCost: true,
     image: "/horse_material/4.jpg",
     ctaText: "Ver proceso de pre-registro",
     ctaHref: "/registro",
@@ -72,11 +72,11 @@ const STEPS: Step[] = [
     number: "04",
     tag: "Paso 4",
     title: "Inspección Oficial GVHS",
-    dateBadge: "9 Mar 2026",
+    dateBadge: "9 Mar 2027",
     description:
       "Una vez que te lleguen los documentos, guárdalos y mantente atento para cuando inicie la inscripción registrarte en la inspección oficial.",
     prerequisiteNote:
-      "Es necesario concluir todos los pasos anteriores (membresía, pruebas de ADN, pre-registro de caballos) para que documentos y caballos estén listos para la inspección oficial del 9 de marzo de 2026, realizada por jueces oficiales de GVHS. En esta inspección se determinará si el caballo califica como Gypsy Vanner y puede entrar a los libros de registro.",
+      "Es necesario concluir todos los pasos anteriores (membresía, pruebas de ADN, pre-registro de caballos) para que documentos y caballos estén listos para la inspección oficial del 9 de marzo de 2027, realizada por jueces oficiales de GVHS. En esta inspección se determinará si el caballo califica como Gypsy Vanner y puede entrar a los libros de registro.",
     hasCost: true,
     image: "/horse_material/5.jpg",
     ctaText: "Preparar pre-registro",
@@ -84,7 +84,7 @@ const STEPS: Step[] = [
   },
 ];
 
-type CostModalTab = "step1" | "step2" | "step4";
+type CostModalTab = "step1" | "step2" | "step3" | "step4";
 
 export default function RegistrationProcessFlow() {
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -213,7 +213,7 @@ export default function RegistrationProcessFlow() {
           {STEPS.map((step, index) => {
             const isActive = activeStep === index;
             const stepTabKey: CostModalTab =
-              index === 0 ? "step1" : index === 1 ? "step2" : "step4";
+              index === 0 ? "step1" : index === 1 ? "step2" : index === 2 ? "step3" : "step4";
 
             return (
               <div
@@ -377,14 +377,14 @@ export default function RegistrationProcessFlow() {
                   Inspección Oficial GVHS
                 </span>
                 <span className="text-xs font-semibold text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-200">
-                  9 de Marzo de 2026
+                  9 de Marzo de 2027
                 </span>
               </div>
               <h4 className="font-serif text-xl sm:text-2xl text-zinc-950">
                 Preparación para la Inspección Presencial de Jueces GVHS
               </h4>
               <p className="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed font-light">
-                Para que tus caballos y documentos estén listos para la evaluación presencial del <strong>9 de marzo de 2026</strong>, es indispensable concluir los 3 pasos previos: membresía anual activa, panel genético de ADN y pre-registro de caballos. En la inspección se determinará si el ejemplar califica como Gypsy Vanner y puede ingresar a los libros oficiales.
+                Para que tus caballos y documentos estén listos para la evaluación presencial del <strong>9 de marzo de 2027</strong>, es indispensable concluir los 3 pasos previos: membresía anual activa, panel genético de ADN y pre-registro de caballos. En la inspección se determinará si el ejemplar califica como Gypsy Vanner y puede ingresar a los libros oficiales.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto flex-shrink-0">
@@ -439,7 +439,7 @@ export default function RegistrationProcessFlow() {
             </div>
 
             {/* Pestañas de Pasos */}
-            <div className="grid grid-cols-3 border-b border-zinc-200 bg-white text-xs font-sans font-medium px-4 pt-2 gap-2 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-zinc-200 bg-white text-xs font-sans font-medium px-4 pt-2 gap-2 text-center">
               <button
                 type="button"
                 onClick={() => setCostModalTab("step1")}
@@ -461,6 +461,17 @@ export default function RegistrationProcessFlow() {
                 }`}
               >
                 2. ADN y Registro
+              </button>
+              <button
+                type="button"
+                onClick={() => setCostModalTab("step3")}
+                className={`pb-2 px-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                  costModalTab === "step3"
+                    ? "border-red-700 text-red-700 font-semibold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                3. Microchip
               </button>
               <button
                 type="button"
@@ -542,13 +553,46 @@ export default function RegistrationProcessFlow() {
                 </div>
               )}
 
+              {/* PASO 3 */}
+              {costModalTab === "step3" && (
+                <div className="p-4 rounded border border-zinc-200 bg-zinc-50/70 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 block">Paso 3</span>
+                      <h4 className="font-serif text-sm font-bold text-zinc-950">Inserción del Microchip</h4>
+                    </div>
+                    <span className="font-medium text-zinc-600 text-xs bg-zinc-200/70 px-2 py-0.5 rounded">
+                      Cotización individual
+                    </span>
+                  </div>
+
+                  <p className="text-zinc-600 font-light leading-relaxed text-xs">
+                    Contacta a un integrante del equipo de GVHS México para recibir una cotización individual para la inserción del microchip.
+                  </p>
+
+                  <div className="pt-2">
+                    <a
+                      href="https://wa.me/523312947594?text=Hola%20Roberto%2C%20quisiera%20solicitar%20una%20cotizaci%C3%B3n%20para%20la%20inserci%C3%B3n%20del%20microchip%20de%20mi%20ejemplar."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-sans text-xs font-semibold rounded transition-colors shadow-xs"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                      <span>Solicitar cotización (Roberto Mena)</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {/* PASO 4 */}
               {costModalTab === "step4" && (
                 <div className="p-4 rounded border border-zinc-200 bg-zinc-50/70 space-y-2">
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 block">Paso 4</span>
-                      <h4 className="font-serif text-sm font-bold text-zinc-950">Inspección Oficial GVHS (9 Mar 2026)</h4>
+                      <h4 className="font-serif text-sm font-bold text-zinc-950">Inspección Oficial GVHS (9 Mar 2027)</h4>
                     </div>
                   </div>
 

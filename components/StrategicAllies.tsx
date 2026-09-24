@@ -1,7 +1,14 @@
 import React from 'react';
+import Image from 'next/image';
 
-const MOCK_ALLIES = [
-  { id: 1, name: "Logo Aliado 1" },
+interface AllyItem {
+  id: number;
+  name: string;
+  logo?: string;
+}
+
+const ALLIES: AllyItem[] = [
+  { id: 1, name: "Rancho El Descanso", logo: "/logoCRD.jpeg" },
   { id: 2, name: "Logo Aliado 2" },
   { id: 3, name: "Logo Aliado 3" },
   { id: 4, name: "Logo Aliado 4" },
@@ -26,15 +33,29 @@ export default function StrategicAllies() {
 
         <div className="flex animate-infinite-scroll w-max hover:[animation-play-state:paused]">
           {/* Duplicamos el array para crear la ilusión de scroll infinito perfecto */}
-          {[...MOCK_ALLIES, ...MOCK_ALLIES, ...MOCK_ALLIES].map((ally, index) => (
+          {[...ALLIES, ...ALLIES, ...ALLIES].map((ally, index) => (
             <div
               key={`${ally.id}-${index}`}
-              className="flex items-center justify-center w-48 md:w-64 h-24 mx-4 md:mx-6 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-default"
+              className="flex items-center justify-center w-48 md:w-64 h-24 mx-4 md:mx-6 transition-all duration-300 cursor-default hover:scale-105"
             >
-              {/* Mock de Logo */}
-              <div className="w-full h-full bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-center shadow-sm">
-                <span className="font-sans font-semibold text-zinc-400 uppercase tracking-widest text-sm">{ally.name}</span>
-              </div>
+              {ally.logo ? (
+                <div className="w-full h-full bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center p-3 shadow-sm relative overflow-hidden">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={ally.logo}
+                      alt={ally.name}
+                      fill
+                      unoptimized
+                      className="object-contain p-1"
+                      sizes="(max-width: 768px) 192px, 256px"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-full bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <span className="font-sans font-semibold text-zinc-400 uppercase tracking-widest text-sm">{ally.name}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
